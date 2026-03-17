@@ -1,0 +1,264 @@
+﻿@model DocumentManagement.Models.DriveViewModel
+
+@{
+    ViewBag.Title = "My Drive";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .sidebar {
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 150px);
+        padding: 20px;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .storage-info {
+        background-color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .storage-bar {
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+
+    .storage-used {
+        height: 100%;
+        background-color: #4285f4;
+        border-radius: 4px;
+        width: 35%;
+    }
+
+    .toolbar {
+        background-color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+    }
+
+        .toolbar button {
+            margin-right: 10px;
+        }
+
+    .file-item, .folder-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+        .file-item:hover, .folder-item:hover {
+            background-color: #f8f9fa;
+        }
+
+    .file-icon, .folder-icon {
+        width: 32px;
+        text-align: center;
+        margin-right: 15px;
+        font-size: 20px;
+    }
+
+    .file-name, .folder-name {
+        flex: 2;
+    }
+
+    .file-size {
+        width: 100px;
+        color: #6c757d;
+    }
+
+    .file-date {
+        width: 150px;
+        color: #6c757d;
+    }
+
+    .file-actions, .folder-actions {
+        width: 150px;
+        text-align: right;
+    }
+
+        .file-actions button, .folder-actions button {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+            .file-actions button:hover, .folder-actions button:hover {
+                color: #4285f4;
+            }
+
+    .starred {
+        color: #ffc107;
+    }
+
+    .breadcrumb {
+        background-color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+    }
+
+    .breadcrumb-item a {
+        color: #4285f4;
+        text-decoration: none;
+    }
+
+    .folder-color-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        display: inline-block;
+        margin-right: 8px;
+    }
+</style>
+
+<div class="row">
+    <!-- Sidebar trái -->
+    <div class="col-md-3">
+        <div class="sidebar">
+            <div class="storage-info">
+                <h6>Dung lượng</h6>
+                <div class="d-flex justify-content-between">
+                    <span>Đã dùng</span>
+                    <span>5.4 GB / 15 GB</span>
+                </div>
+                <div class="storage-bar">
+                    <div class="storage-used"></div>
+                </div>
+            </div>
+
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-cloud"></i> My Drive
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="fas fa-star"></i> Starred
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="fas fa-trash"></i> Trash
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nội dung chính -->
+    <div class="col-md-9">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">My Drive</a></li>
+            </ol>
+        </nav>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            @using (Html.BeginForm("Upload", "Drive", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <input type="file" name="files" id="fileUpload" multiple style="display: none;" onchange="this.form.submit()" />
+                <input type="hidden" name="folderId" value="@Model.CurrentFolderID" />
+                <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('fileUpload').click();" data-bs-toggle="tooltip" title="Upload file">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+            }
+            <button class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Tạo thư mục mới">
+                <i class="fas fa-folder-plus"></i> New Folder
+            </button>
+            <button class="btn btn-secondary btn-sm" data-bs-toggle="tooltip" title="Tải xuống">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Xóa">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+            <button class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="Chia sẻ">
+                <i class="fas fa-share-alt"></i> Share
+            </button>
+        </div>
+
+        <!-- Danh sách thư mục -->
+        <h6 class="mt-3">Thư mục</h6>
+        <div class="folder-list">
+            @foreach (var folder in Model.Folders)
+            {
+                <div class="folder-item">
+                    <div class="folder-icon">
+                        <i class="fas fa-folder" style="color: @folder.FolderColor;"></i>
+                    </div>
+                    <div class="folder-name">
+                        <span class="folder-color-dot" style="background-color: @folder.FolderColor;"></span>
+                        @folder.FolderName
+                    </div>
+                    <div class="file-date">
+                        @folder.CreatedAt.ToString("dd/MM/yyyy")
+                    </div>
+                    <div class="folder-actions">
+                        <button title="Download"><i class="fas fa-download"></i></button>
+                        <button title="Chia sẻ"><i class="fas fa-share-alt"></i></button>
+                        <button title="Xóa"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Danh sách file -->
+        <h6 class="mt-4">File</h6>
+        <div class="file-list">
+            @foreach (var file in Model.Files)
+            {
+                <div class="file-item">
+                    <div class="file-icon">
+                        @if (file.FileType == "pdf")
+                        {
+                            <i class="fas fa-file-pdf text-danger"></i>
+                        }
+                        else if (file.FileType == "jpg" || file.FileType == "png")
+                        {
+                            <i class="fas fa-file-image text-success"></i>
+                        }
+                        else if (file.FileType == "docx" || file.FileType == "doc")
+                        {
+                            <i class="fas fa-file-word text-primary"></i>
+                        }
+                        else if (file.FileType == "xlsx" || file.FileType == "xls")
+                        {
+                            <i class="fas fa-file-excel text-success"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-file text-secondary"></i>
+                        }
+                    </div>
+                    <div class="file-name">
+                        @if (file.IsStarred)
+                        {
+                            <i class="fas fa-star starred"></i>
+                        }
+                        @file.FileName
+                    </div>
+                    <div class="file-size">@file.FormattedSize</div>
+                    <div class="file-date">@file.UploadedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                    <div class="file-actions">
+                        <button title="Đánh dấu sao"><i class="fas fa-star"></i></button>
+                        <button title="Download"><i class="fas fa-download"></i></button>
+                        <button title="Chia sẻ"><i class="fas fa-share-alt"></i></button>
+                        <button title="Xóa"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+</script>

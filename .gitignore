@@ -1,0 +1,15 @@
+## Ignore Visual Studio temporary files
+.vs/
+bin/
+obj/
+packages/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Ignore Storage folder (chứa file upload)
+DocumentManagement/Storage/
+
+## Ignore local config
+Web.config
