@@ -122,6 +122,24 @@
 </style>
 
 <div class="row">
+    <!-- Modal tạo folder -->
+    <div class="modal fade" id="newFolderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tạo thư mục mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="folderName" class="form-control" placeholder="Nhập tên thư mục">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="btnCreateFolder">Tạo</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Sidebar trái -->
     <div class="col-md-3">
         <div class="sidebar">
@@ -143,7 +161,7 @@
                 <a href="#" class="list-group-item list-group-item-action">
                     <i class="fas fa-star"></i> Starred
                 </a>
-                <a href="#" class="list-group-item list-group-item-action">
+                <a href="@Url.Action("Trash", "Drive")" class="list-group-item list-group-item-action">
                     <i class="fas fa-trash"></i> Trash
                 </a>
             </div>
@@ -155,7 +173,11 @@
         <!-- Breadcrumb -->
         <nav class="breadcrumb-nav">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">My Drive</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Drive")">My Drive</a></li>
+                @foreach (var folder in Model.Breadcrumb)
+                {
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Drive", new { folderId = folder.ID })">@folder.FolderName</a></li>
+                }
             </ol>
         </nav>
 
@@ -169,7 +191,7 @@
                     <i class="fas fa-upload"></i> Upload
                 </button>
             }
-            <button class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Tạo thư mục mới">
+            <button type="button" class="btn btn-success btn-sm" id="btnNewFolder" data-bs-toggle="tooltip" title="Tạo thư mục mới">
                 <i class="fas fa-folder-plus"></i> New Folder
             </button>
             <button class="btn btn-secondary btn-sm" data-bs-toggle="tooltip" title="Tải xuống">
@@ -188,7 +210,7 @@
         <div class="folder-list">
             @foreach (var folder in Model.Folders)
             {
-                <div class="folder-item">
+                <div class="folder-item" style="cursor: pointer;" onclick="window.location.href='@Url.Action("Index", "Drive", new { folderId = folder.ID })'">
                     <div class="folder-icon">
                         <i class="fas fa-folder" style="color: @folder.FolderColor;"></i>
                     </div>
@@ -200,7 +222,7 @@
                         @folder.CreatedAt.ToString("dd/MM/yyyy")
                     </div>
                     <div class="folder-actions">
-                        <button title="Download"><i class="fas fa-download"></i></button>
+                        <button title="Download" disabled style="opacity:0.5;"><i class="fas fa-download"></i></button>
                         <button title="Chia sẻ"><i class="fas fa-share-alt"></i></button>
                         <button title="Xóa"><i class="fas fa-trash"></i></button>
                     </div>
@@ -247,9 +269,13 @@
                     <div class="file-date">@file.UploadedAt.ToString("dd/MM/yyyy HH:mm")</div>
                     <div class="file-actions">
                         <button title="Đánh dấu sao"><i class="fas fa-star"></i></button>
-                        <button title="Download"><i class="fas fa-download"></i></button>
+                        <a href="@Url.Action("Download", "Drive", new { id = file.ID })" title="Download" style="color: #6c757d;">
+                            <i class="fas fa-download"></i>
+                        </a>
                         <button title="Chia sẻ"><i class="fas fa-share-alt"></i></button>
-                        <button title="Xóa"><i class="fas fa-trash"></i></button>
+                        <button class="delete-file" data-id="@file.ID" title="Xóa">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
             }
@@ -258,7 +284,95 @@
 </div>
 
 <script>
-    $(function () {
-        $('[data-bs-toggle="tooltip"]').tooltip();
+    // Đợi trang load xong
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 1. XỬ LÝ TOOLTIP
+        var tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        if (typeof bootstrap !== 'undefined') {
+            tooltips.forEach(function (el) {
+                new bootstrap.Tooltip(el);
+            });
+        }
+
+        // 2. XỬ LÝ NÚT XÓA
+        var deleteButtons = document.querySelectorAll('.delete-file');
+        console.log('Tìm thấy ' + deleteButtons.length + ' nút xóa');
+
+        deleteButtons.forEach(function (button) {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                var fileId = this.getAttribute('data-id');
+                var row = this.closest('.file-item');
+
+                if (confirm('Bạn có chắc muốn xóa file này?')) {
+                    // Gửi request xóa
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/Drive/Delete', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                    xhr.onload = function () {
+                        if (xhr.status === 200) {
+                            var data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                row.remove(); // Xóa dòng khỏi giao diện
+                            } else {
+                                alert('Lỗi: ' + data.message);
+                            }
+                        } else {
+                            alert('Lỗi kết nối server');
+                        }
+                    };
+
+                    xhr.send('id=' + fileId);
+                }
+            });
+        });
+
+        // 3. XỬ LÝ UPLOAD FILE (khi chọn file)
+        var fileUpload = document.getElementById('fileUpload');
+        if (fileUpload) {
+            fileUpload.addEventListener('change', function () {
+                this.form.submit();
+            });
+        }
+
     });
+
+   // Mở modal tạo folder
+document.getElementById('btnNewFolder').addEventListener('click', function() {
+    var modal = new bootstrap.Modal(document.getElementById('newFolderModal'));
+    modal.show();
+});
+
+// Xử lý tạo folder
+document.getElementById('btnCreateFolder').addEventListener('click', function() {
+    var folderName = document.getElementById('folderName').value;
+    var currentFolderId = '@Model.CurrentFolderID';
+
+    if (!folderName) {
+        alert('Vui lòng nhập tên thư mục');
+        return;
+    }
+
+    // Gửi request tạo folder
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/Drive/CreateFolder', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        }
+    };
+
+    xhr.send('folderName=' + encodeURIComponent(folderName) + '&folderId=' + currentFolderId);
+});
+
 </script>

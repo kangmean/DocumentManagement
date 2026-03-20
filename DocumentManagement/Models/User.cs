@@ -78,4 +78,10 @@ namespace DocumentManagement.Models
         public int? FolderID { get; set; }
     }
 
+    public class CreateFolderModel
+    {
+        public string FolderName { get; set; }
+        public int? ParentFolderID { get; set; }
+    }
+
 }

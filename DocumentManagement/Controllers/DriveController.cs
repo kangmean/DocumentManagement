@@ -286,5 +286,217 @@ namespace DocumentManagement.Controllers
 
             return breadcrumb;
         }
+
+        // GET: Download file
+        public ActionResult Download(int id)
+        {
+            if (Session["UserID"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            int userID = (int)Session["UserID"];
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT * FROM Files WHERE ID = @ID AND UserID = @UserID AND IsDeleted = 0";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", id);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    string filePath = reader["FilePath"].ToString();
+                    string fileName = reader["FileName"].ToString();
+
+                    // Ghi log download (sẽ làm sau)
+
+                    // Trả file về cho client
+                    byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+                    return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+                }
+            }
+
+            return HttpNotFound();
+        }
+
+        // POST: Delete file (xóa mềm)
+        [HttpPost]
+        public ActionResult Delete(int id)
+        {
+            if (Session["UserID"] == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            int userID = (int)Session["UserID"];
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE Files SET IsDeleted = 1, DeletedAt = GETDATE() WHERE ID = @ID AND UserID = @UserID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", id);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+
+                conn.Open();
+                int rows = cmd.ExecuteNonQuery();
+
+                if (rows > 0)
+                {
+                    return Json(new { success = true, message = "Đã xóa file" });
+                }
+            }
+
+            return Json(new { success = false, message = "Không tìm thấy file" });
+        }
+
+        // POST: Create Folder
+        [HttpPost]
+        public ActionResult CreateFolder(string folderName, int? folderId)
+        {
+            if (Session["UserID"] == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            int userID = (int)Session["UserID"];
+
+            if (string.IsNullOrEmpty(folderName))
+            {
+                return Json(new { success = false, message = "Tên folder không được để trống" });
+            }
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"INSERT INTO Folders (FolderName, UserID, ParentFolderID, CreatedAt, IsDeleted, FolderColor)
+                        VALUES (@FolderName, @UserID, @ParentFolderID, GETDATE(), 0, '#808080')";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@FolderName", folderName);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+
+                // SỬA CHỖ NÀY: Nếu folderId = 0 hoặc null thì truyền DBNull
+                if (folderId == null || folderId == 0)
+                {
+                    cmd.Parameters.AddWithValue("@ParentFolderID", DBNull.Value);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@ParentFolderID", folderId);
+                }
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+
+                return Json(new { success = true, message = "Đã tạo folder" });
+            }
+        }
+
+        // GET: Trash
+        public ActionResult Trash()
+        {
+            if (Session["UserID"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            int userID = (int)Session["UserID"];
+
+            var files = new List<FileModel>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT * FROM Files WHERE UserID = @UserID AND IsDeleted = 1 ORDER BY DeletedAt DESC";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    files.Add(new FileModel
+                    {
+                        ID = (int)reader["ID"],
+                        FileName = reader["FileName"].ToString(),
+                        FileSize = (int)reader["FileSize"],
+                        FileType = reader["FileType"].ToString(),
+                        DeletedAt = reader["DeletedAt"] == DBNull.Value ? null : (DateTime?)reader["DeletedAt"]
+                    });
+                }
+            }
+
+            return View(files);
+        }
+
+        [HttpPost]
+        public ActionResult Restore(int id)
+        {
+            if (Session["UserID"] == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            int userID = (int)Session["UserID"];
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE Files SET IsDeleted = 0, DeletedAt = NULL WHERE ID = @ID AND UserID = @UserID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", id);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+
+                conn.Open();
+                int rows = cmd.ExecuteNonQuery();
+
+                if (rows > 0)
+                {
+                    return Json(new { success = true });
+                }
+            }
+
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        public ActionResult DeleteForever(int id)
+        {
+            if (Session["UserID"] == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            int userID = (int)Session["UserID"];
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                // Lấy đường dẫn file trước khi xóa
+                string query = "SELECT FilePath FROM Files WHERE ID = @ID AND UserID = @UserID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", id);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+
+                conn.Open();
+                string filePath = cmd.ExecuteScalar()?.ToString();
+
+                if (!string.IsNullOrEmpty(filePath) && System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+
+                // Xóa khỏi database
+                query = "DELETE FROM Files WHERE ID = @ID AND UserID = @UserID";
+                cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", id);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+                cmd.ExecuteNonQuery();
+            }
+
+            return Json(new { success = true });
+        }
+
     }
 }
