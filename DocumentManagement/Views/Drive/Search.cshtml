@@ -1,0 +1,52 @@
+﻿@model List<DocumentManagement.Models.FileModel>
+
+@{
+    ViewBag.Title = "Tìm kiếm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-search"></i> Kết quả tìm kiếm: "@ViewBag.Keyword"</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <p class="text-muted text-center">Không tìm thấy file nào</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tên file</th>
+                        <th>Kích thước</th>
+                        <th>Ngày upload</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var file in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (file.IsStarred)
+                                {
+                                    <i class="fas fa-star text-warning me-2"></i>
+                                }
+                                @file.FileName
+                            </td>
+                            <td>@file.FormattedSize</td>
+                            <td>@file.UploadedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a href="@Url.Action("Download", "Drive", new { id = file.ID })" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

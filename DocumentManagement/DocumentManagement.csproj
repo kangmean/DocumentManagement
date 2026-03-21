@@ -184,6 +184,10 @@
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Drive\Index.cshtml" />
     <Content Include="Views\Drive\Trash.cshtml" />
+    <Content Include="Views\Drive\Starred.cshtml" />
+    <Content Include="Views\Drive\Search.cshtml" />
+    <Content Include="Views\Drive\SharedPassword.cshtml" />
+    <Content Include="Views\Drive\SharedView.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

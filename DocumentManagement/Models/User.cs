@@ -84,4 +84,18 @@ namespace DocumentManagement.Models
         public int? ParentFolderID { get; set; }
     }
 
+    public class SharedLink
+    {
+        public int ID { get; set; }
+        public int FileID { get; set; }
+        public string Token { get; set; }
+        public string Password { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int DownloadCount { get; set; }
+        public string FileName { get; set; } // Thêm để hiển thị
+        public string FilePath { get; set; }  
+        public int FileSize { get; set; }
+    }
+
 }

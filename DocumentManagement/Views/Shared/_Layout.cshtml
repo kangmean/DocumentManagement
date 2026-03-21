@@ -21,6 +21,131 @@
             .navbar-nav .nav-link i {
                 margin-right: 5px;
             }
+
+        /* Gradient Background cho Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Card Style cho nội dung */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            }
+
+        /* Toolbar buttons */
+        .toolbar button {
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+            .toolbar button:hover {
+                transform: translateY(-1px);
+            }
+
+        /* File items */
+        .file-item, .folder-item {
+            border-radius: 10px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+        }
+
+            .file-item:hover, .folder-item:hover {
+                background-color: #f8f9ff !important;
+                transform: translateX(5px);
+            }
+
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .list-group-item {
+            border: none;
+            border-radius: 10px !important;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+        }
+
+            .list-group-item:hover {
+                background-color: #667eea !important;
+                color: white !important;
+                transform: translateX(5px);
+            }
+
+            .list-group-item.active {
+                background: linear-gradient(135deg, #667eea, #764ba2) !important;
+                border: none;
+            }
+
+        /* Storage bar */
+        .storage-bar {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .storage-used {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        /* Icons */
+        .fa-star.text-warning {
+            text-shadow: 0 0 5px rgba(255,193,7,0.5);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+            padding: 10px 0;
+        }
+
+        .breadcrumb-item a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .breadcrumb-item a:hover {
+                color: #764ba2;
+            }
+
+        /* Search bar */
+        .search-box {
+            border-radius: 25px;
+            border: none;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+            .search-box::placeholder {
+                color: rgba(255,255,255,0.7);
+            }
+
+        .search-btn {
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+        }
+
+            .search-btn:hover {
+                background: rgba(255,255,255,0.3);
+            }
+
     </style>
 </head>
 <body>
@@ -59,6 +184,14 @@
                         }
                     }
                 </ul>
+
+                <form class="d-flex mx-auto" action="@Url.Action("Search", "Drive")" method="GET">
+                    <input class="form-control me-2" type="search" name="keyword" placeholder="🔍 Tìm kiếm file..." style="width: 300px;" required>
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+
                 <ul class="navbar-nav">
                     @if (Session["UserID"] != null)
                     {
