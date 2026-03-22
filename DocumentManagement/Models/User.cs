@@ -98,4 +98,26 @@ namespace DocumentManagement.Models
         public int FileSize { get; set; }
     }
 
+    public class ActivityLog
+    {
+        public int ID { get; set; }
+        public int UserID { get; set; }
+        public string UserName { get; set; }
+        public string Action { get; set; }
+        public string FileName { get; set; }
+        public int FileSize { get; set; }
+        public DateTime Time { get; set; }
+        public string IPAddress { get; set; }
+
+        public string FormattedSize
+        {
+            get
+            {
+                if (FileSize < 1024) return FileSize + " B";
+                if (FileSize < 1024 * 1024) return (FileSize / 1024) + " KB";
+                return (FileSize / (1024 * 1024)) + " MB";
+            }
+        }
+    }
+
 }

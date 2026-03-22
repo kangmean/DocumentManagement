@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentManagement.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -127,6 +128,10 @@ namespace DocumentManagement.Controllers
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
+                
+                string userName = Session["Username"].ToString();
+                string ip = LogHelper.GetClientIP();
+                LogHelper.Log(userID, userName, "Upload", fileName, fileSize, ip);
             }
         }
 
@@ -336,9 +341,11 @@ namespace DocumentManagement.Controllers
                 {
                     string filePath = reader["FilePath"].ToString();
                     string fileName = reader["FileName"].ToString();
-
+                    int fileSize = (int)reader["FileSize"];
                     // Ghi log download (sẽ làm sau)
-
+                    string userName = Session["Username"].ToString();
+                    string ip = LogHelper.GetClientIP();
+                    LogHelper.Log(userID, userName, "Download", fileName, fileSize, ip);
                     // Trả file về cho client
                     byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
                     return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
@@ -358,19 +365,45 @@ namespace DocumentManagement.Controllers
             }
 
             int userID = (int)Session["UserID"];
+            string userName = Session["Username"].ToString();
+            string ip = LogHelper.GetClientIP();
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                // Lấy thông tin file trước khi xóa
+                string getFileQuery = "SELECT FileName, FileSize FROM Files WHERE ID = @ID AND UserID = @UserID AND IsDeleted = 0";
+                SqlCommand getCmd = new SqlCommand(getFileQuery, conn);
+                getCmd.Parameters.AddWithValue("@ID", id);
+                getCmd.Parameters.AddWithValue("@UserID", userID);
+
+                conn.Open();
+                SqlDataReader reader = getCmd.ExecuteReader();
+                string fileName = "";
+                int fileSize = 0;
+
+                if (reader.Read())
+                {
+                    fileName = reader["FileName"].ToString();
+                    fileSize = (int)reader["FileSize"];
+                }
+                reader.Close();
+
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    return Json(new { success = false, message = "Không tìm thấy file" });
+                }
+
+                // Xóa mềm
                 string query = "UPDATE Files SET IsDeleted = 1, DeletedAt = GETDATE() WHERE ID = @ID AND UserID = @UserID";
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@ID", id);
                 cmd.Parameters.AddWithValue("@UserID", userID);
-
-                conn.Open();
                 int rows = cmd.ExecuteNonQuery();
 
                 if (rows > 0)
                 {
+                    // Ghi log xóa
+                    LogHelper.Log(userID, userName, "Delete", fileName, fileSize, ip);
                     return Json(new { success = true, message = "Đã xóa file" });
                 }
             }
@@ -690,6 +723,25 @@ namespace DocumentManagement.Controllers
                 int rows = cmd.ExecuteNonQuery();
                 System.Diagnostics.Debug.WriteLine("Số dòng insert: " + rows);
 
+                // Lấy tên file và kích thước (gộp chung 1 lần gọi)
+                string fileName = "";
+                int fileSize = 0;
+                using (SqlCommand getFileCmd = new SqlCommand("SELECT FileName, FileSize FROM Files WHERE ID = @FileID", conn))
+                {
+                    getFileCmd.Parameters.AddWithValue("@FileID", fileId);
+                    SqlDataReader reader = getFileCmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        fileName = reader["FileName"].ToString();
+                        fileSize = Convert.ToInt32(reader["FileSize"]);
+                    }
+                    reader.Close();
+                }
+
+                string userName = Session["Username"].ToString();
+                string ip = LogHelper.GetClientIP();
+                LogHelper.Log(userID, userName, "Share", fileName, fileSize, ip);
+
                 string shareUrl = Request.Url.Scheme + "://" + Request.Url.Authority + "/Drive/Shared?token=" + token;
 
                 return Json(new { success = true, url = shareUrl, token = token });
@@ -869,6 +921,76 @@ namespace DocumentManagement.Controllers
             }
 
             return Json(new { success = false });
+        }
+
+        // GET: Drive/PreviewPDF
+        public ActionResult PreviewPDF(int id)
+        {
+            if (Session["UserID"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            int userID = (int)Session["UserID"];
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT * FROM Files WHERE ID = @ID AND UserID = @UserID AND IsDeleted = 0 AND FileType = 'pdf'";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", id);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    string filePath = reader["FilePath"].ToString();
+                    string fileName = reader["FileName"].ToString();
+
+                    ViewBag.FileID = id;
+                    ViewBag.FileName = fileName;
+                    ViewBag.FilePath = filePath;
+
+                    return View();
+                }
+            }
+
+            return Content("Không tìm thấy file PDF hoặc bạn không có quyền xem");
+        }
+
+        public ActionResult GetPdfFile(string filePath)
+        {
+            // Kiểm tra đăng nhập
+            if (Session["UserID"] == null)
+            {
+                return Content("Lỗi: Chưa đăng nhập");
+            }
+
+            // Giải mã đường dẫn
+            filePath = Server.UrlDecode(filePath);
+
+            // Kiểm tra filePath
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return Content("Lỗi: filePath bị null hoặc rỗng");
+            }
+
+            // Kiểm tra file tồn tại
+            if (!System.IO.File.Exists(filePath))
+            {
+                return Content("Lỗi: File không tồn tại tại đường dẫn: " + filePath);
+            }
+
+            try
+            {
+                byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+                return File(fileBytes, "application/pdf");
+            }
+            catch (Exception ex)
+            {
+                return Content("Lỗi đọc file: " + ex.Message);
+            }
         }
 
     }

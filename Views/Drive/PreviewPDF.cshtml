@@ -1,0 +1,208 @@
+﻿@{
+    ViewBag.Title = "Xem trước PDF";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string filePath = ViewBag.FilePath;
+    string fileName = ViewBag.FileName;
+    int fileId = ViewBag.FileID;
+}
+
+<style>
+    .pdf-toolbar {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+        .pdf-toolbar button {
+            padding: 5px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            .pdf-toolbar button:hover {
+                background: #e9ecef;
+            }
+
+    .pdf-container {
+        background: #e9ecef;
+        padding: 20px;
+        border-radius: 8px;
+        min-height: 600px;
+        text-align: center;
+        overflow: auto;
+    }
+
+    canvas {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin: 0 auto;
+        display: block;
+    }
+
+    .page-info {
+        background: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        border: 1px solid #dee2e6;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 18px;
+        color: #6c757d;
+    }
+</style>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-file-pdf"></i> Xem trước: @fileName</h5>
+    </div>
+    <div class="card-body">
+        <!-- Toolbar -->
+        <div class="pdf-toolbar">
+            <button id="prev-page" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-chevron-left"></i> Trang trước
+            </button>
+            <span class="page-info">
+                Trang <span id="current-page">1</span> / <span id="total-pages">...</span>
+            </span>
+            <button id="next-page" class="btn btn-sm btn-outline-secondary">
+                Trang sau <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="flex-grow-1"></div>
+            <button id="zoom-in" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-search-plus"></i> Phóng to
+            </button>
+            <button id="zoom-out" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-search-minus"></i> Thu nhỏ
+            </button>
+            <a href="@Url.Action("Download", "Drive", new { id = fileId })" class="btn btn-sm btn-primary">
+                <i class="fas fa-download"></i> Tải xuống
+            </a>
+        </div>
+
+        <!-- PDF Container -->
+        <div class="pdf-container" id="pdf-container">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p class="mt-2">Đang tải PDF...</p>
+            </div>
+            <canvas id="pdf-canvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm thư viện PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+<script>
+    // Cấu hình worker cho PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    // Khai báo biến
+    var pdfDoc = null;
+    var currentPage = 1;
+    var scale = 1.2;
+    var canvas = document.getElementById('pdf-canvas');
+    var ctx = canvas.getContext('2d');
+
+    // Lấy đường dẫn file từ server - SỬA LẠI CÁCH LẤY
+    var filePath = decodeURIComponent('@Html.Raw(Url.Encode(filePath))');
+    console.log("File path: " + filePath);
+
+    // Chuyển đổi đường dẫn file vật lý thành URL để đọc
+    function getPdfUrl() {
+        // Dùng encodeURIComponent để mã hóa đường dẫn
+        var encodedPath = encodeURIComponent(filePath);
+        var url = '@Url.Action("GetPdfFile", "Drive")' + '?filePath=' + encodedPath;
+        console.log("PDF URL: " + url);
+        return url;
+    }
+
+    // Tải PDF
+    function loadPdf() {
+        var loadingDiv = document.querySelector('.loading');
+
+        pdfjsLib.getDocument(getPdfUrl()).promise.then(function(pdf) {
+            pdfDoc = pdf;
+            document.getElementById('total-pages').textContent = pdfDoc.numPages;
+            loadingDiv.style.display = 'none';
+            renderPage(currentPage);
+        }).catch(function(error) {
+            console.error('Lỗi tải PDF:', error);
+            loadingDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Không thể tải file PDF. Lỗi: ' + error.message + '</div>';
+        });
+    }
+
+    // Hiển thị trang
+    function renderPage(pageNum) {
+        pdfDoc.getPage(pageNum).then(function(page) {
+            var viewport = page.getViewport({ scale: scale });
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            var renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+
+            page.render(renderContext);
+            document.getElementById('current-page').textContent = pageNum;
+        });
+    }
+
+    // Chuyển trang
+    function goPrevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderPage(currentPage);
+        }
+    }
+
+    function goNextPage() {
+        if (currentPage < pdfDoc.numPages) {
+            currentPage++;
+            renderPage(currentPage);
+        }
+    }
+
+    function zoomIn() {
+        scale += 0.2;
+        renderPage(currentPage);
+    }
+
+    function zoomOut() {
+        if (scale > 0.4) {
+            scale -= 0.2;
+            renderPage(currentPage);
+        }
+    }
+
+    // Gán sự kiện sau khi DOM load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadPdf();
+
+        document.getElementById('prev-page').addEventListener('click', goPrevPage);
+        document.getElementById('next-page').addEventListener('click', goNextPage);
+        document.getElementById('zoom-in').addEventListener('click', zoomIn);
+        document.getElementById('zoom-out').addEventListener('click', zoomOut);
+
+        // Phím tắt
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                goPrevPage();
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                goNextPage();
+                e.preventDefault();
+            }
+        });
+    });
+</script>

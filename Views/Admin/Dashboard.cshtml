@@ -1,0 +1,191 @@
+﻿@model DocumentManagement.Models.AdminDashboardViewModel
+
+@{
+    ViewBag.Title = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9ff;
+        cursor: pointer;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-chart-line"></i> Admin Dashboard</h2>
+    </div>
+</div>
+
+<!-- Thống kê tổng quan -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalUsers</div>
+            <div class="stat-label"><i class="fas fa-users"></i> Người dùng</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+            <div class="stat-number">@Model.TotalFiles</div>
+            <div class="stat-label"><i class="fas fa-file"></i> Tổng file</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);">
+            <div class="stat-number">@(Model.TotalStorage / (1024 * 1024)) MB</div>
+            <div class="stat-label"><i class="fas fa-database"></i> Dung lượng đã dùng</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="stat-number">@Model.TrashFiles</div>
+            <div class="stat-label"><i class="fas fa-trash"></i> File trong thùng rác</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Top 5 User -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-trophy"></i> Top 5 người dùng upload nhiều nhất</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Số file</th>
+                            <th>Dung lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.TopUsers.Count; i++)
+                        {
+                            var user = Model.TopUsers[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@user.Username</td>
+                                <td>@user.FileCount</td>
+                                <td>@user.FormattedSize</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 5 File được share nhiều nhất -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-download"></i> Top 5 file được tải nhiều nhất</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tên file</th>
+                            <th>Lượt tải</th>
+                            <th>Người upload</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.TopFiles.Count; i++)
+                        {
+                            var file = Model.TopFiles[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@file.FileName</td>
+                                <td>@file.DownloadCount</td>
+                                <td>@file.UploaderName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Files -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-clock"></i> File mới upload gần đây</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tên file</th>
+                                <th>Kích thước</th>
+                                <th>Loại</th>
+                                <th>Ngày upload</th>
+                                <th>User ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var file in Model.RecentFiles)
+                            {
+                                <tr>
+                                    <td>@file.FileName</td>
+                                    <td>@file.FormattedSize</td>
+                                    <td>@file.FileType</td>
+                                    <td>@file.UploadedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@file.UserID</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Thêm active cho menu Admin
+        var adminLink = document.querySelector('a[href*="Admin"]');
+        if (adminLink) {
+            adminLink.classList.add('active');
+        }
+    });
+</script>

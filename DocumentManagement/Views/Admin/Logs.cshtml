@@ -1,0 +1,102 @@
+﻿@model List<DocumentManagement.Models.ActivityLog>
+
+@{
+    ViewBag.Title = "Lịch sử hoạt động";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .badge-action {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-upload {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge-download {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+    .badge-delete {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .badge-share {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+</style>
+
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="fas fa-history"></i> Lịch sử hoạt động (200 gần nhất)</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Người dùng</th>
+                        <th>Hành động</th>
+                        <th>Tên file</th>
+                        <th>Kích thước</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model)
+                    {
+                        string badgeClass = "";
+                        string icon = "";
+
+                        switch (log.Action)
+                        {
+                            case "Upload":
+                                badgeClass = "badge-upload";
+                                icon = "📤";
+                                break;
+                            case "Download":
+                                badgeClass = "badge-download";
+                                icon = "📥";
+                                break;
+                            case "Delete":
+                                badgeClass = "badge-delete";
+                                icon = "🗑️";
+                                break;
+                            case "Share":
+                                badgeClass = "badge-share";
+                                icon = "🔗";
+                                break;
+                        }
+
+                        <tr>
+                            <td style="white-space: nowrap;">@log.Time.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>@log.UserName</td>
+                            <td>
+                                <span class="badge-action @badgeClass">
+                                    @icon @log.Action
+                                </span>
+                            </td>
+                            <td>@log.FileName</td>
+                            <td>@log.FormattedSize</td>
+                            <td><code>@log.IPAddress</code></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <p class="text-muted text-center">Chưa có hoạt động nào</p>
+        }
+    </div>
+</div>
