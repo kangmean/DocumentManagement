@@ -1,49 +1,457 @@
 ﻿@model List<DocumentManagement.Models.FileModel>
 
 @{
-    ViewBag.Title = "Starred";
+    ViewBag.Title = "Starred Files";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="card">
-    <div class="card-header bg-warning">
-        <h5 class="mb-0"><i class="fas fa-star"></i> File đã đánh dấu sao</h5>
+<style>
+    .drive-layout {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+    }
+
+    .drive-sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid #E0E0E0;
+        position: sticky;
+        top: 100px;
+        align-self: flex-start;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+    }
+
+        .drive-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .drive-sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .drive-sidebar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        .drive-sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #666;
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+
+            .drive-sidebar .menu-item i {
+                width: 24px;
+                font-size: 18px;
+            }
+
+            .drive-sidebar .menu-item:hover {
+                background: #F5F5F5;
+                color: #00BCD4;
+            }
+
+            .drive-sidebar .menu-item.active {
+                background: #00BCD4;
+                color: white;
+            }
+
+    .drive-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #212121;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .section-title i {
+            color: #00BCD4;
+        }
+
+    .file-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #E0E0E0;
+    }
+
+        .file-table th {
+            background: #F8F9FA;
+            padding: 14px 16px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        .file-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+    .file-row:hover {
+        background: #F8F9FA;
+    }
+
+    .file-icon {
+        font-size: 24px;
+        margin-right: 12px;
+    }
+
+    .file-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+        .file-actions button, .file-actions a {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+            .file-actions button:hover, .file-actions a:hover {
+                background: #F0F0F0;
+                color: #00BCD4;
+            }
+
+    .star-active {
+        color: #FFC107 !important;
+    }
+
+    .empty-message {
+        text-align: center;
+        padding: 60px;
+        background: white;
+        border-radius: 12px;
+        color: #999;
+    }
+
+    /* Modal */
+    /* Modal cao cấp */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        visibility: hidden;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+    .modal-container {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 32px;
+        width: 480px;
+        max-width: 90%;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 188, 212, 0.1);
+        transform: scale(0.9) translateY(20px);
+        transition: all 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+        overflow: hidden;
+    }
+
+    .modal-overlay.active .modal-container {
+        transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 28px;
+        background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.3px;
+        }
+
+            .modal-header h3 i {
+                font-size: 24px;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            }
+
+    .modal-close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        color: white;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+    .modal-body {
+        padding: 28px;
+    }
+
+        .modal-body p {
+            margin: 0 0 12px 0;
+            color: #1e293b;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .modal-body strong {
+            color: #00BCD4;
+            font-weight: 600;
+        }
+
+        .modal-body input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 15px;
+            transition: all 0.2s;
+            background: white;
+            font-weight: 500;
+        }
+
+            .modal-body input:focus {
+                outline: none;
+                border-color: #00BCD4;
+                box-shadow: 0 0 0 4px rgba(0, 188, 212, 0.1);
+            }
+
+            .modal-body input::placeholder {
+                color: #94a3b8;
+                font-weight: 400;
+            }
+
+        .modal-body small {
+            display: block;
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 12px;
+            padding-left: 8px;
+        }
+
+    .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding: 20px 28px 28px 28px;
+        background: #f8fafc;
+        border-top: 1px solid #eef2f6;
+    }
+
+    .btn-modal-cancel {
+        padding: 12px 28px;
+        background: #f1f5f9;
+        border: none;
+        border-radius: 40px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        transition: all 0.2s;
+        letter-spacing: -0.2px;
+    }
+
+        .btn-modal-cancel:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+    .btn-modal-confirm {
+        padding: 12px 32px;
+        background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+        color: white;
+        border: none;
+        border-radius: 40px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+        letter-spacing: -0.2px;
+        box-shadow: 0 2px 8px rgba(0, 188, 212, 0.3);
+    }
+
+        .btn-modal-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 188, 212, 0.4);
+        }
+
+        .btn-modal-confirm.delete {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+            .btn-modal-confirm.delete:hover {
+                box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+            }
+</style>
+
+<div class="drive-layout">
+    <div class="drive-sidebar">
+        <div class="menu-item" onclick="location.href='@Url.Action("Index", "Drive")'">
+            <i class="fas fa-cloud"></i> My Drive
+        </div>
+        <div class="menu-item" onclick="location.href='@Url.Action("Recent", "Drive")'">
+            <i class="fas fa-clock"></i> Recent
+        </div>
+        <div class="menu-item active" onclick="location.href='@Url.Action("Starred", "Drive")'">
+            <i class="fas fa-star"></i> Starred
+        </div>
+        <div class="menu-item" onclick="location.href='@Url.Action("Trash", "Drive")'">
+            <i class="fas fa-trash"></i> Trash
+        </div>
     </div>
-    <div class="card-body">
+
+    <div class="drive-content">
+        <div class="section-title">
+            <i class="fas fa-star"></i> Starred Files
+        </div>
+
         @if (Model.Count == 0)
         {
-            <p class="text-muted text-center">Chưa có file nào được đánh dấu sao</p>
+            <div class="empty-message">
+                <i class="fas fa-star"></i>
+                <p>Chưa có file nào được đánh dấu sao</p>
+            </div>
         }
         else
         {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Tên file</th>
-                        <th>Kích thước</th>
-                        <th>Ngày upload</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var file in Model)
-                    {
+            <div class="file-table">
+                <table style="width:100%">
+                    <thead>
                         <tr>
-                            <td>
-                                <i class="fas fa-star text-warning me-2"></i>
-                                @file.FileName
-                            </td>
-                            <td>@file.FormattedSize</td>
-                            <td>@file.UploadedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>
-                                <a href="@Url.Action("Download", "Drive", new { id = file.ID })" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-download"></i> Download
-                                </a>
-                            </td>
+                            <th>Tên file</th>
+                            <th>Kích thước</th>
+                            <th>Ngày tải lên</th>
+                            <th style="text-align:right">Thao tác</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var file in Model)
+                        {
+                            <tr class="file-row">
+                                <td>
+                                    <i class="fas @(file.FileType == "pdf" ? "fa-file-pdf" : file.FileType == "docx" ? "fa-file-word" : file.FileType == "xlsx" ? "fa-file-excel" : "fa-file") file-icon"
+                                       style="color:@(file.FileType == "pdf" ? "#DC3545" : file.FileType == "docx" ? "#0D6EFD" : file.FileType == "xlsx" ? "#198754" : "#6C757D")"></i>
+                                    @file.FileName
+                                    <i class="fas fa-star star-active" style="margin-left: 8px;"></i>
+                                </td>
+                                <td>@file.FormattedSize</td>
+                                <td>@file.UploadedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td style="text-align:right">
+                                    <div class="file-actions">
+                                        @if (file.FileType == "pdf")
+                                        {
+                                            <a href="@Url.Action("PreviewPDF", "Drive", new { id = file.ID })" target="_blank" title="Xem trước">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        }
+                                        <a href="@Url.Action("Download", "Drive", new { id = file.ID })" title="Tải xuống">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <button class="share-file" data-id="@file.ID" title="Chia sẻ">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                        <button class="delete-file" data-id="@file.ID" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <button class="star-file" data-id="@file.ID" title="@(file.IsStarred ? "Bỏ sao" : "Đánh dấu sao")">
+                                            <i class="fas fa-star @(file.IsStarred ? "star-active" : "")"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.delete-file').forEach(btn => btn.onclick = e => {
+        e.stopPropagation();
+        if (confirm('Xóa file?')) {
+            fetch('/Drive/Delete', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + btn.dataset.id })
+                .then(() => location.reload());
+        }
+    });
+
+    document.querySelectorAll('.star-file').forEach(btn => btn.onclick = e => {
+        e.stopPropagation();
+        fetch('/Drive/ToggleStar', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + btn.dataset.id })
+            .then(() => location.reload());
+    });
+
+    document.querySelectorAll('.share-file').forEach(btn => btn.onclick = e => {
+        e.stopPropagation();
+        let pwd = prompt('Mật khẩu (tùy chọn):');
+        fetch('/Drive/CreateShareLink', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'fileId=' + btn.dataset.id + '&password=' + encodeURIComponent(pwd || '')
+        }).then(r => r.json()).then(d => { if (d.success) prompt('Link:', d.url); else alert(d.message); });
+    });
+</script>
+

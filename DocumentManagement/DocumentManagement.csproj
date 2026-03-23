@@ -196,6 +196,10 @@
     <Content Include="Views\Admin\Files.cshtml" />
     <Content Include="Views\Drive\PreviewPDF.cshtml" />
     <Content Include="Views\Admin\Logs.cshtml" />
+    <Content Include="Views\Drive\SharedFolderView.cshtml" />
+    <Content Include="Views\Drive\SharedFolderPassword.cshtml" />
+    <Content Include="Views\Account\Profile.cshtml" />
+    <Content Include="Views\Drive\Recent.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

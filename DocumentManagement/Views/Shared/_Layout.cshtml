@@ -1,231 +1,328 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - Document Management</title>
-    @Styles.Render("~/Content/css")
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    @Scripts.Render("~/bundles/modernizr")
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
     <style>
-        .navbar-brand img {
-            height: 30px;
-            margin-right: 10px;
+        :root {
+            --primary: #00BCD4;
+            --primary-dark: #0097A7;
+            --text-dark: #212121;
+            --text-light: #666666;
+            --bg-gray: #F5F5F5;
+            --white: #FFFFFF;
+            --border: #E0E0E0;
         }
 
-        .navbar-nav .nav-link {
-            padding: 0.5rem 1rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-            .navbar-nav .nav-link i {
-                margin-right: 5px;
-            }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+        }
 
-        /* Gradient Background cho Navbar */
+        h1, h2, h3, h4, h5, h6, .font-headline {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        /* Navbar */
         .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--white) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-bottom: 2px solid var(--primary);
+            padding: 0.75rem 1.5rem;
         }
 
-        /* Card Style cho nội dung */
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+        .navbar-brand {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--text-dark) !important;
         }
 
-            .card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            }
+        .navbar-brand span {
+            color: var(--primary);
+        }
 
-        /* Toolbar buttons */
-        .toolbar button {
-            border-radius: 8px;
-            transition: all 0.2s;
+        .nav-link {
             font-weight: 500;
+            color: var(--text-light) !important;
+            transition: all 0.2s ease;
+            margin: 0 0.25rem;
         }
 
-            .toolbar button:hover {
-                transform: translateY(-1px);
-            }
-
-        /* File items */
-        .file-item, .folder-item {
-            border-radius: 10px;
-            margin-bottom: 5px;
-            transition: all 0.2s;
+        .nav-link:hover {
+            color: var(--primary) !important;
         }
 
-            .file-item:hover, .folder-item:hover {
-                background-color: #f8f9ff !important;
-                transform: translateX(5px);
-            }
-
-        /* Sidebar */
-        .sidebar {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        .nav-link.active {
+            color: var(--primary) !important;
         }
 
-        .list-group-item {
-            border: none;
-            border-radius: 10px !important;
-            margin-bottom: 5px;
-            transition: all 0.2s;
-        }
-
-            .list-group-item:hover {
-                background-color: #667eea !important;
-                color: white !important;
-                transform: translateX(5px);
-            }
-
-            .list-group-item.active {
-                background: linear-gradient(135deg, #667eea, #764ba2) !important;
-                border: none;
-            }
-
-        /* Storage bar */
-        .storage-bar {
-            background-color: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .storage-used {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.3s ease;
-        }
-
-        /* Icons */
-        .fa-star.text-warning {
-            text-shadow: 0 0 5px rgba(255,193,7,0.5);
-        }
-
-        /* Breadcrumb */
-        .breadcrumb {
-            background: transparent;
-            padding: 10px 0;
-        }
-
-        .breadcrumb-item a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-            .breadcrumb-item a:hover {
-                color: #764ba2;
-            }
-
-        /* Search bar */
+        /* Search box */
         .search-box {
-            border-radius: 25px;
-            border: none;
-            padding: 8px 20px;
-            background: rgba(255,255,255,0.2);
-            color: white;
+            background: var(--bg-gray);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            width: 280px;
+            transition: all 0.2s;
         }
 
-            .search-box::placeholder {
-                color: rgba(255,255,255,0.7);
-            }
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.2);
+        }
 
         .search-btn {
-            border-radius: 25px;
-            background: rgba(255,255,255,0.2);
+            background: var(--primary);
             border: none;
+            border-radius: 2rem;
+            padding: 0.5rem 1.25rem;
             color: white;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
-            .search-btn:hover {
-                background: rgba(255,255,255,0.3);
-            }
+        .search-btn:hover {
+            background: var(--primary-dark);
+        }
 
+        /* Dropdown menu */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem;
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(0, 188, 212, 0.1);
+            color: var(--primary);
+        }
+
+        .dropdown-item i {
+            width: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--white);
+            border-top: 1px solid var(--border);
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        /* Card */
+        .card-custom {
+            background: var(--white);
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .card-custom:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dark);
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-outline-custom:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Container */
+        .main-container {
+            min-height: calc(100vh - 70px - 70px);
+            padding: 2rem;
+        }
+
+        /* Responsive */
+        media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            .search-box {
+                width: 180px;
+            }
+            .main-container {
+                padding: 1rem;
+            }
+        }
+
+        .search-advanced-btn:hover {
+            background: #F5F5F5 !important;
+            color: #666;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box {
+            border-radius: 2rem 0 0 2rem !important;
+        }
+
+        .search-btn {
+            border-radius: 0 !important;
+            margin: 0 !important;
+        }
+
+        .search-advanced-btn {
+            background: #F5F5F5 !important;
+            border: none;
+            border-radius: 0 2rem 2rem 0;
+            padding: 0 14px;
+            color: #666;
+            transition: none;
+            cursor: pointer;
+        }
+        .search-advanced-btn i {
+            font-size: 16px;
+        }
+
+        .dropdown-menu-end {
+            right: 0;
+            left: auto;
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            margin-right: 8px;
+        }
+
+        .search-advanced-btn {
+            background: white !important;
+            border: 1px solid #E0E0E0 !important;
+            border-left: none !important;
+            transition: none !important;
+        }
+
+            .search-advanced-btn:hover {
+                background: white !important;
+                border: 1px solid #E0E0E0 !important;
+                border-left: none !important;
+                color: #666 !important;
+            }
     </style>
+
+    @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container-fluid">
-            @Html.ActionLink("Document Management", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            <a class="navbar-brand" href="@Url.Action("Index", "Drive")">
+                DOCUMENT<span>MANAGEMENT</span>
+            </a>
+
+            <!-- Thanh tìm kiếm và nút nâng cao - đặt cạnh logo -->
+            @if (Session["UserID"] != null)
+            {
+                <div class="d-flex ms-3">
+                    <div class="input-group">
+                        <input class="search-box" type="search" name="keyword" id="searchKeyword" placeholder="🔍 Tìm kiếm file..." style="border-radius: 2rem 0 0 2rem; width: 280px;" />
+                        <button class="search-btn" type="submit" id="searchBtn" style="border-radius: 0; margin: 0;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="search-advanced-btn" type="button" id="advancedSearchBtn"
+                                style="background: white; border: 1px solid #E0E0E0; border-radius: 0 2rem 2rem 0; padding: 0 18px; margin-left: 2px;">
+                            <i class="fas fa-sliders-h" style="font-size: 16px;"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     @if (Session["UserID"] != null)
                     {
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Drive")">
-                                <i class="fas fa-cloud"></i> My Drive
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Starred", "Drive")">
-                                <i class="fas fa-star"></i> Starred
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Trash", "Drive")">
-                                <i class="fas fa-trash"></i> Trash
-                            </a>
-                        </li>
-                        if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"] == true)
+                        if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
                                     <i class="fas fa-cog"></i> Admin
                                 </a>
-                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                    <li>
-                                        <a class="dropdown-item" href="@Url.Action("Dashboard", "Admin")">
-                                            <i class="fas fa-chart-line"></i> Dashboard
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="@Url.Action("Users", "Admin")">
-                                            <i class="fas fa-users"></i> Quản lý người dùng
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="@Url.Action("Files", "Admin")">
-                                            <i class="fas fa-file-alt"></i> Quản lý file
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="@Url.Action("Logs", "Admin")">
-                                            <i class="fas fa-history"></i> Lịch sử hoạt động
-                                        </a>
-                                    </li>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="@Url.Action("Dashboard", "Admin")"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Users", "Admin")"><i class="fas fa-users"></i> Quản lý người dùng</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Files", "Admin")"><i class="fas fa-file-alt"></i> Quản lý file</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Logs", "Admin")"><i class="fas fa-history"></i> Lịch sử hoạt động</a></li>
                                 </ul>
                             </li>
                         }
                     }
                 </ul>
 
-                <form class="d-flex mx-auto" action="@Url.Action("Search", "Drive")" method="GET">
-                    <input class="form-control me-2" type="search" name="keyword" placeholder="🔍 Tìm kiếm file..." style="width: 300px;" required>
-                    <button class="btn btn-outline-light" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
-
                 <ul class="navbar-nav">
                     @if (Session["UserID"] != null)
                     {
-                        <li class="nav-item">
-                            <span class="nav-link text-white">
-                                <i class="fas fa-user"></i> @Session["Username"]
-                            </span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Logout", "Account")">
-                                <i class="fas fa-sign-out-alt"></i> Logout
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle"></i> @Session["Username"]
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Account")"><i class="fas fa-user"></i> Thông tin tài khoản</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-question-circle"></i> Trợ giúp</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+                            </ul>
                         </li>
                     }
                     else
@@ -241,19 +338,159 @@
         </div>
     </nav>
 
-    <div class="container-fluid mt-3">
+    <!-- Main Content -->
+    <div class="main-container">
         @RenderBody()
     </div>
 
-    <footer class="footer mt-auto py-3 bg-light">
-        <div class="container text-center">
-            <span class="text-muted">© @DateTime.Now.Year - Document Management System</span>
-        </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© @DateTime.Now.Year - Document Management System</p>
     </footer>
 
- 
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("scripts", required: false)
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Hàm reset form
+            function resetAdvSearchForm() {
+                let advFileName = document.getElementById('advFileName');
+                let advFileType = document.getElementById('advFileType');
+                let advSizeOp = document.getElementById('advSizeOp');
+                let advDate = document.getElementById('advDate');
+                if (advFileName) advFileName.value = '';
+                if (advFileType) advFileType.value = '';
+                if (advSizeOp) advSizeOp.value = '';
+                if (advDate) advDate.value = '';
+            }
+
+            // Mở modal
+            let advancedSearchBtn = document.getElementById('advancedSearchBtn');
+            if (advancedSearchBtn) {
+                advancedSearchBtn.onclick = () => {
+                    resetAdvSearchForm();
+                    let modal = document.getElementById('advancedSearchModal');
+                    if (modal) modal.style.display = 'flex';
+                };
+            }
+
+            // Đóng modal bằng nút X
+            let closeAdvSearch = document.getElementById('closeAdvSearch');
+            if (closeAdvSearch) {
+                closeAdvSearch.onclick = () => {
+                    let modal = document.getElementById('advancedSearchModal');
+                    if (modal) modal.style.display = 'none';
+                };
+            }
+
+            // Nút Đặt lại
+            let resetAdvSearch = document.getElementById('resetAdvSearch');
+            if (resetAdvSearch) {
+                resetAdvSearch.onclick = () => {
+                    resetAdvSearchForm();
+                };
+            }
+
+            // Click ra ngoài để đóng
+            let modal = document.getElementById('advancedSearchModal');
+            if (modal) {
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                };
+            }
+
+            // Tìm kiếm nâng cao
+            let submitAdvSearch = document.getElementById('submitAdvSearch');
+            if (submitAdvSearch) {
+                submitAdvSearch.onclick = () => {
+                    let params = new URLSearchParams();
+                    let fileName = document.getElementById('advFileName');
+                    let fileType = document.getElementById('advFileType');
+                    let sizeOp = document.getElementById('advSizeOp');
+                    let dateOp = document.getElementById('advDate');
+
+                    if (fileName && fileName.value) params.append('keyword', fileName.value);
+                    if (fileType && fileType.value) params.append('type', fileType.value);
+                    if (sizeOp && sizeOp.value) params.append('size', sizeOp.value);
+                    if (dateOp && dateOp.value) params.append('date', dateOp.value);
+
+                    window.location.href = '/Drive/AdvancedSearch?' + params.toString();
+                };
+            }
+
+            // Tìm kiếm thường
+            let searchBtn = document.getElementById('searchBtn');
+            let searchKeyword = document.getElementById('searchKeyword');
+
+            if (searchBtn) {
+                searchBtn.onclick = () => {
+                    if (searchKeyword && searchKeyword.value) {
+                        window.location.href = '/Drive/Search?keyword=' + encodeURIComponent(searchKeyword.value);
+                    }
+                };
+            }
+
+            if (searchKeyword) {
+                searchKeyword.onkeypress = (e) => {
+                    if (e.key === 'Enter' && searchBtn) {
+                        searchBtn.click();
+                    }
+                };
+            }
+        });
+    </script>
+
+    <!-- Modal tìm kiếm nâng cao -->
+    <div id="advancedSearchModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; padding: 24px; width: 400px; max-width: 90%; position: relative;">
+            <button id="closeAdvSearch" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 style="margin-bottom: 20px;"><i class="fas fa-search-plus"></i> Tìm kiếm nâng cao</h3>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Tên file</label>
+                <input type="text" id="advFileName" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;" placeholder="Nhập tên file..." />
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Loại file</label>
+                <select id="advFileType" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
+                    <option value="">Tất cả</option>
+                    <option value="pdf">PDF</option>
+                    <option value="docx">Word</option>
+                    <option value="xlsx">Excel</option>
+                    <option value="jpg">Hình ảnh</option>
+                    <option value="png">Hình ảnh</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Kích thước</label>
+                <select id="advSizeOp" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
+                    <option value="">Không giới hạn</option>
+                    <option value="lt">&lt; 1 MB</option>
+                    <option value="lt5">&lt; 5 MB</option>
+                    <option value="gt5">&gt; 5 MB</option>
+                    <option value="gt10">&gt; 10 MB</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Ngày tải lên</label>
+                <select id="advDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
+                    <option value="">Bất kỳ</option>
+                    <option value="today">Hôm nay</option>
+                    <option value="week">7 ngày qua</option>
+                    <option value="month">30 ngày qua</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="resetAdvSearch" style="padding: 8px 16px; background: #F5F5F5; border: none; border-radius: 8px; cursor: pointer;">Đặt lại</button>
+                <button id="submitAdvSearch" style="padding: 8px 16px; background: #00BCD4; color: white; border: none; border-radius: 8px; cursor: pointer;">Tìm kiếm</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

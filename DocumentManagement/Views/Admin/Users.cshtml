@@ -5,102 +5,620 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>User Management - Archive Pro</title>
+    <!-- Tailwind CSS with Plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Google Fonts: Manrope & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#6c797c",
+                        "on-surface-variant": "#3c494c",
+                        "tertiary-fixed-dim": "#ffb77b",
+                        "on-surface": "#1b1c1c",
+                        "surface-container": "#f0eded",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary": "#006876",
+                        "on-primary-fixed": "#001f25",
+                        "inverse-on-surface": "#f3f0ef",
+                        "secondary-fixed-dim": "#66d6e7",
+                        "on-error-container": "#93000a",
+                        "on-background": "#1b1c1c",
+                        "secondary-container": "#7fedfe",
+                        "on-secondary-fixed-variant": "#004f58",
+                        "background": "#fcf9f8",
+                        "tertiary-fixed": "#ffdcc2",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#6d3a00",
+                        "surface-variant": "#e5e2e1",
+                        "on-tertiary-container": "#633400",
+                        "primary-fixed-dim": "#44d8f1",
+                        "primary-fixed": "#a1efff",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fcf9f8",
+                        "primary-container": "#00bcd4",
+                        "surface-dim": "#dcd9d9",
+                        "secondary": "#006874",
+                        "on-primary-container": "#004650",
+                        "inverse-surface": "#303030",
+                        "surface-tint": "#006876",
+                        "outline-variant": "#bbc9cc",
+                        "secondary-fixed": "#97f0ff",
+                        "surface-container-low": "#f6f3f2",
+                        "surface": "#fcf9f8",
+                        "tertiary-container": "#f19640",
+                        "on-secondary-fixed": "#001f24",
+                        "tertiary": "#8f4e00",
+                        "on-secondary-container": "#006b77",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#44d8f1",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#eae7e7",
+                        "on-primary-fixed-variant": "#004e59",
+                        "on-tertiary-fixed": "#2e1500"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .sidebar-active {
+            box-shadow: inset -4px 0 0 0 #006876;
+        }
+
+        body {
+            background-color: #fcf9f8;
+            color: #1b1c1c;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- SideNavBar Shell -->
+    <aside class="flex flex-col fixed left-0 top-0 h-full h-screen w-64 bg-white shadow-[1px_0_0_0_rgba(0,0,0,0.05)] font-manrope text-sm font-medium z-50">
+        <div class="px-6 py-8 flex items-center gap-3">
+            <div class="w-10 h-10 bg-primary-container flex items-center justify-center rounded-lg">
+                <span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-cyan-800">Archive Pro</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-400">Document Intel</p>
+            </div>
+        </div>
+        <nav class="flex-1 px-4 space-y-1 mt-4">
+            <!-- Dashboard -->
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-cyan-600 hover:bg-slate-50 transition-colors rounded-lg group" href="#">
+                <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <!-- Documents -->
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-cyan-600 hover:bg-slate-50 transition-colors rounded-lg group" href="#">
+                <span class="material-symbols-outlined" data-icon="description">description</span>
+                <span>Documents</span>
+            </a>
+            <!-- User Management (ACTIVE) -->
+            <a class="flex items-center gap-3 px-4 py-3 text-cyan-700 font-bold bg-slate-50 border-r-4 border-cyan-600 transition-colors rounded-l-lg group" href="#">
+                <span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+                <span>User Management</span>
+            </a>
+            <!-- Archives -->
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-cyan-600 hover:bg-slate-50 transition-colors rounded-lg group" href="#">
+                <span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                <span>Archives</span>
+            </a>
+            <!-- Settings -->
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-cyan-600 hover:bg-slate-50 transition-colors rounded-lg group" href="#">
+                <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="p-4 mt-auto">
+            <button class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-3 rounded-xl font-semibold scale-95 active:scale-100 transition-transform">
+                <span class="material-symbols-outlined text-sm">add</span>
+                New Document
+            </button>
+        </div>
+    </aside>
+    <!-- TopNavBar Shell -->
+    <header class="flex justify-between items-center w-full pl-72 pr-8 py-4 bg-[#fcf9f8] fixed top-0 z-40 font-manrope text-base font-semibold">
+        <div class="flex items-center gap-6">
+            <h2 class="text-xl text-on-surface font-bold tracking-tight">User Management</h2>
+            <div class="relative w-96">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+                <input class="w-full bg-surface-container-low border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/40 placeholder:text-outline/60 transition-all" placeholder="Search by name, email or role..." type="text" />
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button class="p-2 text-on-surface-variant hover:text-cyan-600 transition-all opacity-80 hover:opacity-100">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+            <button class="p-2 text-on-surface-variant hover:text-cyan-600 transition-all opacity-80 hover:opacity-100">
+                <span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+            </button>
+            <div class="h-10 w-10 rounded-full bg-surface-container-highest overflow-hidden cursor-pointer border border-outline-variant/20">
+                <img alt="User Avatar" class="w-full h-full object-cover" data-alt="Professional user profile headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9DZRUMHsNnMXPOVsWsvC59hY7sQED3Ib0hUZFsAR4Q6AHjT0iCaEYM9i5fckHFeHS6DiKScAfQJXhK22VYhzv2orQu5dpZ8IQx0liyW_hdEwfaIuVertHfSh7Ui2Y6Nm9XuzSuOLRsmANZD4Q0vwdVDSLiSpfxvRIUp23wMeHVm6pPNdPnH7YjQbt3e6IGvpbW9evDzurnDNxyWKfSMkOsfaubdc3TyYmZT5j7AijL5qYTpw0oITDInhrjMNjb_JuectvWACuBbLt" />
+            </div>
+        </div>
+    </header>
+    <!-- Main Canvas -->
+    <main class="pl-72 pr-8 pt-24 pb-12 min-h-screen">
+        <!-- Header Section with Stats (Asymmetric Layout) -->
+        <div class="grid grid-cols-12 gap-6 mb-8">
+            <div class="col-span-12 md:col-span-8">
+                <div class="bg-gradient-to-br from-primary to-primary-container p-8 rounded-2xl flex flex-col justify-between relative overflow-hidden h-48 shadow-[0_12px_32px_-4px_rgba(0,104,118,0.15)]">
+                    <div class="relative z-10">
+                        <span class="text-on-primary/80 font-label text-xs uppercase tracking-widest mb-2 block">Organization Insight</span>
+                        <h3 class="text-on-primary text-4xl font-headline font-bold">1,284 Active Seats</h3>
+                        <p class="text-on-primary/70 text-sm mt-2 max-w-md font-body">Manage permissions and security protocols for your entire organizational hierarchy from a centralized dashboard.</p>
+                    </div>
+                    <span class="material-symbols-outlined absolute -right-8 -bottom-8 text-white/20 text-[160px] select-none" style="font-variation-settings: 'FILL' 1;">groups</span>
+                </div>
+            </div>
+            <div class="col-span-12 md:col-span-4 flex flex-col gap-4">
+                <div class="flex-1 bg-surface-container-lowest p-6 rounded-2xl flex items-center justify-between group cursor-default">
+                    <div>
+                        <p class="text-on-surface-variant text-xs font-label uppercase tracking-widest mb-1">New Requests</p>
+                        <p class="text-2xl font-headline font-extrabold text-on-surface">24</p>
+                    </div>
+                    <div class="h-12 w-12 rounded-full bg-secondary-container/30 flex items-center justify-center group-hover:bg-secondary-container transition-colors">
+                        <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">person_add</span>
+                    </div>
+                </div>
+                <div class="flex-1 bg-surface-container-lowest p-6 rounded-2xl flex items-center justify-between group cursor-default">
+                    <div>
+                        <p class="text-on-surface-variant text-xs font-label uppercase tracking-widest mb-1">Pending Sync</p>
+                        <p class="text-2xl font-headline font-extrabold text-on-surface">12</p>
+                    </div>
+                    <div class="h-12 w-12 rounded-full bg-tertiary-container/30 flex items-center justify-center group-hover:bg-tertiary-container transition-colors">
+                        <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">sync</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Table Filters & Actions -->
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <select class="appearance-none bg-surface-container-low border-none rounded-xl py-2 pl-4 pr-10 text-sm font-semibold text-on-surface-variant focus:ring-2 focus:ring-primary/40 cursor-pointer">
+                        <option>All Roles</option>
+                        <option>Admin</option>
+                        <option>Editor</option>
+                        <option>Viewer</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none">expand_more</span>
+                </div>
+                <div class="relative">
+                    <select class="appearance-none bg-surface-container-low border-none rounded-xl py-2 pl-4 pr-10 text-sm font-semibold text-on-surface-variant focus:ring-2 focus:ring-primary/40 cursor-pointer">
+                        <option>Status: All</option>
+                        <option>Active</option>
+                        <option>Inactive</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none">expand_more</span>
+                </div>
+            </div>
+            <button class="bg-[#00BCD4] hover:bg-cyan-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-cyan-500/20 active:scale-95">
+                <span class="material-symbols-outlined text-lg">person_add</span>
+                Add New User
+            </button>
+        </div>
+        <!-- Data Table (The Gallery Approach) -->
+        <div class="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-[0_4px_24px_-8px_rgba(0,0,0,0.04)]">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-container-low/50">
+                        <th class="px-8 py-5 text-xs font-label uppercase tracking-widest text-outline">User Entity</th>
+                        <th class="px-8 py-5 text-xs font-label uppercase tracking-widest text-outline">Role</th>
+                        <th class="px-8 py-5 text-xs font-label uppercase tracking-widest text-outline">Security Status</th>
+                        <th class="px-8 py-5 text-xs font-label uppercase tracking-widest text-outline text-right">Operations</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y-0">
+                    <!-- Row 1 -->
+                    <tr class="group hover:bg-surface-container-low transition-colors duration-200">
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="h-11 w-11 rounded-xl overflow-hidden shadow-sm">
+                                    <img alt="User 1" class="w-full h-full object-cover" data-alt="Male portrait with professional lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlfgv2jauBVCi4o3Y741LBHF-6ucio1Fw4wKU9FcygHYkL6X_IscABtLXh9TUsZY_nBcJGakDswUYW6EYDfr20sTdm2FVvYT4a3D4gb9CResB0JMZ7rpyQWy7-h5M08EnxUQZeu7HZ6UvXYDOJbOMLf4qiqbGXHYl6kxQew30vH9dz6fAhySPRe1LB8v-ZFiT9iP1HezPbDLIkmBhBtAUSKjJhmmcGLcT2QCWcEyFzQFxzTzFHv-MOC0tqlY5XBAO0KyTB2VQ81o5L" />
+                                </div>
+                                <div>
+                                    <p class="font-headline font-bold text-on-surface text-base">Marcus Thorne</p>
+                                    <p class="text-on-surface-variant text-sm font-body opacity-70">m.thorne@archivepro.ai</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-[11px] font-bold uppercase tracking-wider">Admin</span>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                <span class="text-on-surface text-sm font-medium">Active</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-2 hover:bg-surface-container-highest rounded-lg text-outline hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
+                                </button>
+                                <button class="p-2 hover:bg-error-container rounded-lg text-outline hover:text-error transition-colors">
+                                    <span class="material-symbols-outlined text-xl">delete</span>
+                                </button>
+                                <button class="p-2 hover:bg-surface-container-highest rounded-lg text-outline transition-colors">
+                                    <span class="material-symbols-outlined text-xl">more_vert</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Row 2 -->
+                    <tr class="group hover:bg-surface-container-low transition-colors duration-200">
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="h-11 w-11 rounded-xl overflow-hidden shadow-sm">
+                                    <img alt="User 2" class="w-full h-full object-cover" data-alt="Female professional business portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2_Li21ouu79CcJSJpU-HCDiuvMR3feu59uxmA5ko4KnApc7jeh2-oWyltDmymzus_RFNhO4p--kUseIdN2R8ZxQqLUsZYHEb0Ps7ELvNhFXBjYwO-4sbyXPDvqa9GJNuoY0oRHxQBN1pjR8PRLwbLMwpezgfYs0U2n2tpwQVGAAfldpS01WLDAd8Ovc0_t-dj396TYWCXAm1O6BBG-2_iHVSRa5tDkbxLJJGpknQqtl1DvaxVHX0yvxDhpli0vSJiclrQGDhPjzll" />
+                                </div>
+                                <div>
+                                    <p class="font-headline font-bold text-on-surface text-base">Elena Rodriguez</p>
+                                    <p class="text-on-surface-variant text-sm font-body opacity-70">e.rod@archivepro.ai</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <span class="px-3 py-1 bg-secondary-container/50 text-on-secondary-fixed-variant rounded-full text-[11px] font-bold uppercase tracking-wider">Editor</span>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                <span class="text-on-surface text-sm font-medium">Active</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-2 hover:bg-surface-container-highest rounded-lg text-outline hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
+                                </button>
+                                <button class="p-2 hover:bg-error-container rounded-lg text-outline hover:text-error transition-colors">
+                                    <span class="material-symbols-outlined text-xl">delete</span>
+                                </button>
+                                <button class="p-2 hover:bg-surface-container-highest rounded-lg text-outline transition-colors">
+                                    <span class="material-symbols-outlined text-xl">more_vert</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Row 3 -->
+                    <tr class="group hover:bg-surface-container-low transition-colors duration-200">
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="h-11 w-11 rounded-xl overflow-hidden shadow-sm">
+                                    <img alt="User 3" class="w-full h-full object-cover" data-alt="Corporate headshot of young male executive" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMUBr2-5auRYYlWH_NeTDqWIu7sQ0Pdrg5Tik-XFvvPu85fhYBh16lfs3XocwcMoR3zzM00oI7Wb2cTgXdIafJkIgBX0kV_V9kbo-hYt1uvN9xr9iKq5Od_G2gco9IRco_Bzb2-Ea3ckN3u8f9JW8VFMoYDnjUrFJgOYE8aMFnWPZgiCQUrtAOHn741nVM9OCDpujglJ0cgXISHRpNYPvs382R5jeiEP75ttKhFdgwUp61kmW-0Gsz-9UmCr2d3_TsvRdddwUsfAtn" />
+                                </div>
+                                <div>
+                                    <p class="font-headline font-bold text-on-surface text-base">Julian Vance</p>
+                                    <p class="text-on-surface-variant text-sm font-body opacity-70">vance.j@external.com</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant rounded-full text-[11px] font-bold uppercase tracking-wider">Viewer</span>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-slate-300"></span>
+                                <span class="text-on-surface-variant text-sm font-medium">Inactive</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-2 hover:bg-surface-container-highest rounded-lg text-outline hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
+                                </button>
+                                <button class="p-2 hover:bg-error-container rounded-lg text-outline hover:text-error transition-colors">
+                                    <span class="material-symbols-outlined text-xl">delete</span>
+                                </button>
+                                <button class="p-2 hover:bg-surface-container-highest rounded-lg text-outline transition-colors">
+                                    <span class="material-symbols-outlined text-xl">more_vert</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Row 4 -->
+                    <tr class="group hover:bg-surface-container-low transition-colors duration-200">
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="h-11 w-11 rounded-xl overflow-hidden shadow-sm">
+                                    <img alt="User 4" class="w-full h-full object-cover" data-alt="Portrait of woman in professional attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjtkYM-n5R50xzPal1UX_AFJdyzi62AAiCDyOSf09FQJMRQq2wyOTqyQ8APNvEngbYfKE_WUf3pkUc0VpD_UdRlAencTOLkZH-UB8s1UoEo7O1m5pigBkVBdStx3foNeuMrHqaHOHQcg0uMMdTfhXoygZIw2crB-Z0POGlwV11LOWmJ4HW8T6QuFnDQ8kx9AOMqPUeMtjLYLhosHkLecHv5zK84YVExLH33-HCV4TXmsIOfAT2HepIV3fQJQweGFM7mGoF15fuVkQi" />
+                                </div>
+                                <div>
+                                    <p class="font-headline font-bold text-on-surface text-base">Sarah Jenkins</p>
+                                    <p class="text-on-surface-variant text-sm font-body opacity-70">s.jenkins@archivepro.ai</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <span class="px-3 py-1 bg-secondary-container/50 text-on-secondary-fixed-variant rounded-full text-[11px] font-bold uppercase tracking-wider">Editor</span>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                <span class="text-on-surface text-sm font-medium">Active</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-2 hover:bg-surface-container-highest rounded-lg text-outline hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
+                                </button>
+                                <button class="p-2 hover:bg-error-container rounded-lg text-outline hover:text-error transition-colors">
+                                    <span class="material-symbols-outlined text-xl">delete</span>
+                                </button>
+                                <button class="p-2 hover:bg-surface-container-highest rounded-lg text-outline transition-colors">
+                                    <span class="material-symbols-outlined text-xl">more_vert</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Pagination Container -->
+            <div class="px-8 py-6 bg-surface-container-low/30 border-t border-outline-variant/10 flex items-center justify-between">
+                <p class="text-on-surface-variant text-xs font-medium">Showing <span class="text-on-surface">1-4</span> of <span class="text-on-surface">1,284</span> users</p>
+                <div class="flex items-center gap-2">
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg border border-outline-variant/30 text-outline hover:bg-surface-container hover:text-on-surface transition-colors disabled:opacity-30" disabled="">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg bg-primary text-on-primary font-bold text-sm">1</button>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg text-on-surface-variant font-medium text-sm hover:bg-surface-container transition-colors">2</button>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg text-on-surface-variant font-medium text-sm hover:bg-surface-container transition-colors">3</button>
+                    <span class="px-1 text-outline">...</span>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg text-on-surface-variant font-medium text-sm hover:bg-surface-container transition-colors">321</button>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg border border-outline-variant/30 text-outline hover:bg-surface-container hover:text-on-surface transition-colors">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Contextual FAB (Hidden as per requirement for specific screens, but technically available in design system if needed) -->
+    <!-- Suppressed based on "Contextual FAB Suppression" rule for User Management screen -->
+</body>
+</html>
+
 <style>
-    .user-blocked {
-        background-color: #fff3f3;
-        opacity: 0.7;
+    /* Thêm style tùy chỉnh nếu cần */
+    .sidebar-active {
+        box-shadow: inset -4px 0 0 0 #006876;
     }
 
-    .badge-blocked {
-        background-color: #dc3545;
-        color: white;
-        padding: 3px 8px;
-        border-radius: 20px;
-        font-size: 11px;
+    body {
+        background-color: #fcf9f8;
+        font-family: 'Inter', sans-serif;
     }
 
-    .badge-active {
-        background-color: #28a745;
-        color: white;
-        padding: 3px 8px;
-        border-radius: 20px;
-        font-size: 11px;
+    .bg-primary-container {
+        background-color: #00BCD4;
+    }
+
+    .text-on-primary-container {
+        color: #004650;
+    }
+
+    .bg-primary {
+        background-color: #006876;
+    }
+
+    .text-primary {
+        color: #006876;
+    }
+
+    .border-cyan-600 {
+        border-color: #00BCD4;
+    }
+
+    .text-cyan-600 {
+        color: #00BCD4;
+    }
+
+    .hover\:text-cyan-600:hover {
+        color: #00BCD4;
+    }
+
+    .bg-\[\#00BCD4\] {
+        background-color: #00BCD4;
+    }
+
+    .hover\:bg-cyan-600:hover {
+        background-color: #0097A7;
     }
 </style>
 
-<div class="card">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="fas fa-users"></i> Quản lý người dùng</h5>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
+<div class="min-h-screen">
+    <!-- Sidebar - Giữ nguyên từ layout cũ hoặc dùng layout hiện tại -->
+    <!-- Main Content -->
+    <main class="pl-72 pr-8 pt-24 pb-12 min-h-screen">
+        <!-- Header Section with Stats -->
+        <div class="grid grid-cols-12 gap-6 mb-8">
+            <div class="col-span-12 md:col-span-8">
+                <div class="bg-gradient-to-br from-[#006876] to-[#00BCD4] p-8 rounded-2xl flex flex-col justify-between relative overflow-hidden h-48 shadow-lg">
+                    <div class="relative z-10">
+                        <span class="text-white/80 text-xs uppercase tracking-widest mb-2 block">Organization Insight</span>
+                        <h3 class="text-white text-4xl font-bold">@Model.Count Active Seats</h3>
+                        <p class="text-white/70 text-sm mt-2 max-w-md">Quản lý người dùng và phân quyền truy cập hệ thống.</p>
+                    </div>
+                    <span class="material-symbols-outlined absolute -right-8 -bottom-8 text-white/20 text-[160px] select-none">groups</span>
+                </div>
+            </div>
+            <div class="col-span-12 md:col-span-4 flex flex-col gap-4">
+                <div class="flex-1 bg-white p-6 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-widest mb-1">New Requests</p>
+                        <p class="text-2xl font-bold text-gray-800">24</p>
+                    </div>
+                    <div class="h-12 w-12 rounded-full bg-[#00BCD4]/30 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[#006876]">person_add</span>
+                    </div>
+                </div>
+                <div class="flex-1 bg-white p-6 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-widest mb-1">Pending Sync</p>
+                        <p class="text-2xl font-bold text-gray-800">12</p>
+                    </div>
+                    <div class="h-12 w-12 rounded-full bg-[#FFB77B]/30 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[#8F4E00]">sync</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Filters & Actions -->
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <select class="appearance-none bg-gray-50 border-none rounded-xl py-2 pl-4 pr-10 text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-[#00BCD4]/40 cursor-pointer">
+                        <option>All Roles</option>
+                        <option>Admin</option>
+                        <option>User</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none">expand_more</span>
+                </div>
+                <div class="relative">
+                    <select class="appearance-none bg-gray-50 border-none rounded-xl py-2 pl-4 pr-10 text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-[#00BCD4]/40 cursor-pointer">
+                        <option>Status: All</option>
+                        <option>Active</option>
+                        <option>Blocked</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none">expand_more</span>
+                </div>
+            </div>
+            <button class="bg-[#00BCD4] hover:bg-[#0097A7] text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-cyan-500/20">
+                <span class="material-symbols-outlined text-lg">person_add</span>
+                Add New User
+            </button>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white rounded-3xl overflow-hidden shadow-md">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Tên đăng nhập</th>
-                        <th>Họ tên</th>
-                        <th>Email</th>
-                        <th>Trạng thái</th>
-                        <th>Ngày tạo</th>
-                        <th>Dung lượng đã dùng</th>
-                        <th>Thao tác</th>
+                    <tr class="bg-gray-50/50">
+                        <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-gray-500">User Entity</th>
+                        <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-gray-500">Role</th>
+                        <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-gray-500">Status</th>
+                        <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-gray-500 text-right">Operations</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var user in Model)
                     {
-                        <tr id="user-@user.ID" class="@(user.IsBlocked ? "user-blocked" : "")">
-                            <td>@user.ID</td>
-                            <td>@user.Username</td>
-                            <td>@(user.FullName ?? "-")</td>
-                            <td>@(user.Email ?? "-")</td>
-                            <td>
-                                @if (user.IsBlocked)
+                        <tr class="group hover:bg-gray-50 transition-colors">
+                            <td class="px-8 py-6">
+                                <div>
+                                    <p class="font-bold text-gray-800 text-base">@user.FullName</p>
+                                    <p class="text-gray-500 text-sm">@user.Username</p>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                @if (user.IsAdmin)
                                 {
-                                    <span class="badge-blocked"><i class="fas fa-ban"></i> Đã khóa</span>
+                                    <span class="px-3 py-1 bg-[#00BCD4]/10 text-[#006876] rounded-full text-[11px] font-bold uppercase">Admin</span>
                                 }
                                 else
                                 {
-                                    <span class="badge-active"><i class="fas fa-check-circle"></i> Hoạt động</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[11px] font-bold uppercase">User</span>
                                 }
                             </td>
-                            <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
-                            <td>@(user.UsedStorage / (1024 * 1024)) MB / @(user.TotalStorage) MB</td>
-                            <td>
-                                <button class="btn btn-sm @(user.IsBlocked ? "btn-success" : "btn-warning") toggle-block"
-                                        data-id="@user.ID"
-                                        data-name="@user.Username">
-                                    <i class="fas @(user.IsBlocked ? "fa-unlock-alt" : "fa-lock")"></i>
-                                    @(user.IsBlocked ? "Mở khóa" : "Khóa")
-                                </button>
+                            <td class="px-8 py-6">
+                                @if (user.IsBlocked)
+                                {
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-2 w-2 rounded-full bg-gray-400"></span>
+                                        <span class="text-gray-600 text-sm">Blocked</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                        <span class="text-gray-800 text-sm">Active</span>
+                                    </div>
+                                }
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-[#006876] transition-colors toggle-block" data-id="@user.ID" data-name="@user.Username">
+                                        <span class="material-symbols-outlined text-xl">
+                                            @(user.IsBlocked ? "lock_open" : "lock")
+                                        </span>
+                                    </button>
+                                    <button class="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+                                        <span class="material-symbols-outlined text-xl">more_vert</span>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            <div class="px-8 py-6 bg-gray-50/30 border-t border-gray-100 flex items-center justify-between">
+                <p class="text-gray-500 text-xs">Showing <span class="text-gray-800">@Model.Count</span> users</p>
+                <div class="flex items-center gap-2">
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg bg-[#006876] text-white font-bold text-sm">1</button>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg text-gray-600 text-sm hover:bg-gray-100 transition-colors">2</button>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg text-gray-600 text-sm hover:bg-gray-100 transition-colors">3</button>
+                    <button class="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
+        // Xử lý toggle block user
         var toggleButtons = document.querySelectorAll('.toggle-block');
-
-        toggleButtons.forEach(function(button) {
-            button.addEventListener('click', function(e) {
+        toggleButtons.forEach(function (button) {
+            button.addEventListener('click', function (e) {
                 e.preventDefault();
                 var userId = this.getAttribute('data-id');
                 var userName = this.getAttribute('data-name');
-                var isBlocking = this.innerHTML.includes('Khóa');
-                var action = isBlocking ? 'khóa' : 'mở khóa';
 
-                if (confirm(`Bạn có chắc muốn ${action} tài khoản "${userName}"?`)) {
+                if (confirm('Bạn có chắc muốn thay đổi trạng thái tài khoản "' + userName + '"?')) {
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', '/Admin/ToggleBlock', true);
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-                    xhr.onload = function() {
+                    xhr.onload = function () {
                         if (xhr.status === 200) {
                             var data = JSON.parse(xhr.responseText);
                             if (data.success) {
@@ -110,7 +628,6 @@
                             }
                         }
                     };
-
                     xhr.send('userId=' + userId);
                 }
             });

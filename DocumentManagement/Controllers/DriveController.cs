@@ -429,14 +429,14 @@ namespace DocumentManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                // KHÔNG có ID trong câu INSERT (ID tự tăng)
                 string query = @"INSERT INTO Folders (FolderName, UserID, ParentFolderID, CreatedAt, IsDeleted, FolderColor)
-                        VALUES (@FolderName, @UserID, @ParentFolderID, GETDATE(), 0, '#808080')";
+                         VALUES (@FolderName, @UserID, @ParentFolderID, GETDATE(), 0, '#808080')";
 
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@FolderName", folderName);
                 cmd.Parameters.AddWithValue("@UserID", userID);
 
-                // SỬA CHỖ NÀY: Nếu folderId = 0 hoặc null thì truyền DBNull
                 if (folderId == null || folderId == 0)
                 {
                     cmd.Parameters.AddWithValue("@ParentFolderID", DBNull.Value);
@@ -678,73 +678,65 @@ namespace DocumentManagement.Controllers
 
         // POST: Tạo link chia sẻ
         [HttpPost]
-        public ActionResult CreateShareLink(int fileId, string password, DateTime? expiryDate)
+        public ActionResult CreateShareLink(int fileId, string password)
         {
-            if (Session["UserID"] == null)
+            try
             {
-                return Json(new { success = false, message = "Chưa đăng nhập" });
-            }
+                // Ghi log ra file để debug
+                string logPath = @"D:\error_log.txt";
+                System.IO.File.AppendAllText(logPath, $"=== CreateShareLink called at {DateTime.Now} ===\n");
+                System.IO.File.AppendAllText(logPath, $"fileId: {fileId}, password: {password ?? "null"}\n");
 
-            int userID = (int)Session["UserID"];
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string checkQuery = "SELECT COUNT(*) FROM Files WHERE ID = @FileID AND UserID = @UserID AND IsDeleted = 0";
-                SqlCommand checkCmd = new SqlCommand(checkQuery, conn);
-                checkCmd.Parameters.AddWithValue("@FileID", fileId);
-                checkCmd.Parameters.AddWithValue("@UserID", userID);
-
-                conn.Open();
-                int count = (int)checkCmd.ExecuteScalar();
-
-                if (count == 0)
+                if (Session["UserID"] == null)
                 {
-                    return Json(new { success = false, message = "File không tồn tại" });
+                    System.IO.File.AppendAllText(logPath, "Session UserID null\n");
+                    return Json(new { success = false, message = "Chưa đăng nhập" });
                 }
 
-                // Tạo token ngẫu nhiên
-                string token = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+                int userID = (int)Session["UserID"];
+                System.IO.File.AppendAllText(logPath, $"userID: {userID}\n");
 
-                // THÊM DEBUG
-                System.Diagnostics.Debug.WriteLine("Tạo token: " + token);
-                System.Diagnostics.Debug.WriteLine("FileID: " + fileId);
-                System.Diagnostics.Debug.WriteLine("Password: " + (string.IsNullOrEmpty(password) ? "null" : password));
-                System.Diagnostics.Debug.WriteLine("ExpiryDate: " + (expiryDate.HasValue ? expiryDate.Value.ToString() : "null"));
-
-                string query = @"INSERT INTO SharedLinks (FileID, Token, Password, ExpiryDate, CreatedAt, DownloadCount)
-                        VALUES (@FileID, @Token, @Password, @ExpiryDate, GETDATE(), 0)";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@FileID", fileId);
-                cmd.Parameters.AddWithValue("@Token", token);
-                cmd.Parameters.AddWithValue("@Password", string.IsNullOrEmpty(password) ? (object)DBNull.Value : password);
-                cmd.Parameters.AddWithValue("@ExpiryDate", expiryDate.HasValue ? (object)expiryDate.Value : DBNull.Value);
-
-                int rows = cmd.ExecuteNonQuery();
-                System.Diagnostics.Debug.WriteLine("Số dòng insert: " + rows);
-
-                // Lấy tên file và kích thước (gộp chung 1 lần gọi)
-                string fileName = "";
-                int fileSize = 0;
-                using (SqlCommand getFileCmd = new SqlCommand("SELECT FileName, FileSize FROM Files WHERE ID = @FileID", conn))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    getFileCmd.Parameters.AddWithValue("@FileID", fileId);
-                    SqlDataReader reader = getFileCmd.ExecuteReader();
-                    if (reader.Read())
+                    string checkQuery = "SELECT COUNT(*) FROM Files WHERE ID = @FileID AND UserID = @UserID AND IsDeleted = 0";
+                    SqlCommand checkCmd = new SqlCommand(checkQuery, conn);
+                    checkCmd.Parameters.AddWithValue("@FileID", fileId);
+                    checkCmd.Parameters.AddWithValue("@UserID", userID);
+                    conn.Open();
+                    int count = (int)checkCmd.ExecuteScalar();
+                    System.IO.File.AppendAllText(logPath, $"File count: {count}\n");
+
+                    if (count == 0)
                     {
-                        fileName = reader["FileName"].ToString();
-                        fileSize = Convert.ToInt32(reader["FileSize"]);
+                        return Json(new { success = false, message = "File không tồn tại" });
                     }
-                    reader.Close();
+
+                    string token = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+                    System.IO.File.AppendAllText(logPath, $"token: {token}\n");
+
+                    string query = @"INSERT INTO SharedLinks (FileID, Token, Password, CreatedAt, DownloadCount)
+                             VALUES (@FileID, @Token, @Password, GETDATE(), 0)";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@FileID", fileId);
+                    cmd.Parameters.AddWithValue("@Token", token);
+                    cmd.Parameters.AddWithValue("@Password", string.IsNullOrEmpty(password) ? (object)DBNull.Value : password);
+
+                    int rows = cmd.ExecuteNonQuery();
+                    System.IO.File.AppendAllText(logPath, $"Rows inserted: {rows}\n");
+
+                    string shareUrl = Request.Url.Scheme + "://" + Request.Url.Authority + "/Drive/Shared?token=" + token;
+                    System.IO.File.AppendAllText(logPath, $"Success, url: {shareUrl}\n");
+
+                    return Json(new { success = true, url = shareUrl });
                 }
-
-                string userName = Session["Username"].ToString();
-                string ip = LogHelper.GetClientIP();
-                LogHelper.Log(userID, userName, "Share", fileName, fileSize, ip);
-
-                string shareUrl = Request.Url.Scheme + "://" + Request.Url.Authority + "/Drive/Shared?token=" + token;
-
-                return Json(new { success = true, url = shareUrl, token = token });
+            }
+            catch (Exception ex)
+            {
+                string logPath = @"D:\error_log.txt";
+                System.IO.File.AppendAllText(logPath, $"ERROR: {ex.Message}\n");
+                System.IO.File.AppendAllText(logPath, $"STACK: {ex.StackTrace}\n");
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -991,6 +983,393 @@ namespace DocumentManagement.Controllers
             {
                 return Content("Lỗi đọc file: " + ex.Message);
             }
+        }
+
+        // Rename folder
+        [HttpPost]
+        public ActionResult RenameFolder(int folderId, string newName)
+        {
+            if (Session["UserID"] == null) return Json(new { success = false });
+            int userID = (int)Session["UserID"];
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE Folders SET FolderName = @NewName WHERE ID = @ID AND UserID = @UserID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@NewName", newName);
+                cmd.Parameters.AddWithValue("@ID", folderId);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            return Json(new { success = true });
+        }
+
+        // Delete folder (xóa mềm, chuyển file vào thùng rác)
+        [HttpPost]
+        public ActionResult DeleteFolder(int folderId)
+        {
+            if (Session["UserID"] == null) return Json(new { success = false });
+            int userID = (int)Session["UserID"];
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                // Xóa mềm folder
+                string query = "UPDATE Folders SET IsDeleted = 1 WHERE ID = @ID AND UserID = @UserID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@ID", folderId);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+                cmd.ExecuteNonQuery();
+
+                // Chuyển file trong folder vào thùng rác
+                query = "UPDATE Files SET IsDeleted = 1, DeletedAt = GETDATE() WHERE FolderID = @FolderID AND UserID = @UserID";
+                cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@FolderID", folderId);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+                cmd.ExecuteNonQuery();
+            }
+            return Json(new { success = true });
+        }
+
+        // Chia sẻ folder
+        [HttpPost]
+        public ActionResult CreateFolderShareLink(int folderId, string password)
+        {
+            if (Session["UserID"] == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            int userID = (int)Session["UserID"];
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                // Kiểm tra folder thuộc user
+                string checkQuery = "SELECT COUNT(*) FROM Folders WHERE ID = @FolderID AND UserID = @UserID AND IsDeleted = 0";
+                SqlCommand checkCmd = new SqlCommand(checkQuery, conn);
+                checkCmd.Parameters.AddWithValue("@FolderID", folderId);
+                checkCmd.Parameters.AddWithValue("@UserID", userID);
+                conn.Open();
+                int count = (int)checkCmd.ExecuteScalar();
+
+                if (count == 0)
+                {
+                    return Json(new { success = false, message = "Thư mục không tồn tại" });
+                }
+
+                // Tạo token
+                string token = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+
+                string query = @"INSERT INTO SharedFolders (FolderID, Token, Password, CreatedAt, ExpiryDate)
+                         VALUES (@FolderID, @Token, @Password, GETDATE(), NULL)";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@FolderID", folderId);
+                cmd.Parameters.AddWithValue("@Token", token);
+                cmd.Parameters.AddWithValue("@Password", string.IsNullOrEmpty(password) ? (object)DBNull.Value : password);
+
+                cmd.ExecuteNonQuery();
+
+                string shareUrl = Request.Url.Scheme + "://" + Request.Url.Authority + "/Drive/SharedFolder?token=" + token;
+
+                return Json(new { success = true, url = shareUrl });
+            }
+        }
+
+        // GET: Xem folder chia sẻ
+        public ActionResult SharedFolder(string token)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                // Lấy thông tin shared folder
+                string query = @"SELECT sf.*, f.FolderName, f.UserID as OwnerID, u.Username as OwnerName
+                         FROM SharedFolders sf
+                         JOIN Folders f ON sf.FolderID = f.ID
+                         JOIN Users u ON f.UserID = u.ID
+                         WHERE sf.Token = @Token 
+                         AND (sf.ExpiryDate IS NULL OR sf.ExpiryDate > GETDATE())";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Token", token);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            return Content("Link chia sẻ không hợp lệ hoặc đã hết hạn");
+                        }
+
+                        int folderId = (int)reader["FolderID"];
+                        string folderName = reader["FolderName"].ToString();
+                        string ownerName = reader["OwnerName"].ToString();
+                        string password = reader["Password"] == DBNull.Value ? null : reader["Password"].ToString();
+                        reader.Close(); // Đóng reader trước khi dùng connection mới
+
+                        // Lấy danh sách file trong folder
+                        var files = new List<FileModel>();
+                        string fileQuery = "SELECT * FROM Files WHERE FolderID = @FolderID AND IsDeleted = 0";
+                        using (SqlCommand fileCmd = new SqlCommand(fileQuery, conn))
+                        {
+                            fileCmd.Parameters.AddWithValue("@FolderID", folderId);
+                            using (SqlDataReader fileReader = fileCmd.ExecuteReader())
+                            {
+                                while (fileReader.Read())
+                                {
+                                    files.Add(new FileModel
+                                    {
+                                        ID = (int)fileReader["ID"],
+                                        FileName = fileReader["FileName"].ToString(),
+                                        FileSize = (int)fileReader["FileSize"],
+                                        FileType = fileReader["FileType"].ToString(),
+                                        UploadedAt = (DateTime)fileReader["UploadedAt"]
+                                    });
+                                }
+                            }
+                        }
+
+                        ViewBag.FolderName = folderName;
+                        ViewBag.OwnerName = ownerName;
+                        ViewBag.Files = files;
+                        ViewBag.Token = token;
+
+                        if (!string.IsNullOrEmpty(password))
+                        {
+                            return View("SharedFolderPassword");
+                        }
+
+                        return View("SharedFolderView", files);
+                    }
+                }
+            }
+        }
+
+        // POST: Xác thực password folder
+        [HttpPost]
+        public ActionResult VerifyFolderPassword(string token, string password)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = @"SELECT sf.*, f.FolderName, f.UserID as OwnerID
+                         FROM SharedFolders sf
+                         JOIN Folders f ON sf.FolderID = f.ID
+                         WHERE sf.Token = @Token AND sf.Password = @Password";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Token", token);
+                    cmd.Parameters.AddWithValue("@Password", password);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            ViewBag.Error = "Mật khẩu không đúng";
+                            ViewBag.Token = token;
+                            return View("SharedFolderPassword");
+                        }
+
+                        int folderId = (int)reader["FolderID"];
+                        string folderName = reader["FolderName"].ToString();
+                        reader.Close();
+
+                        // Lấy danh sách file
+                        var files = new List<FileModel>();
+                        string fileQuery = "SELECT * FROM Files WHERE FolderID = @FolderID AND IsDeleted = 0";
+                        using (SqlCommand fileCmd = new SqlCommand(fileQuery, conn))
+                        {
+                            fileCmd.Parameters.AddWithValue("@FolderID", folderId);
+                            using (SqlDataReader fileReader = fileCmd.ExecuteReader())
+                            {
+                                while (fileReader.Read())
+                                {
+                                    files.Add(new FileModel
+                                    {
+                                        ID = (int)fileReader["ID"],
+                                        FileName = fileReader["FileName"].ToString(),
+                                        FileSize = (int)fileReader["FileSize"],
+                                        FileType = fileReader["FileType"].ToString(),
+                                        UploadedAt = (DateTime)fileReader["UploadedAt"]
+                                    });
+                                }
+                            }
+                        }
+
+                        ViewBag.FolderName = folderName;
+                        ViewBag.Files = files;
+                        ViewBag.Token = token;
+                        return View("SharedFolderView", files);
+                    }
+                }
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DownloadSharedFile(int fileId, string token)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                // Kiểm tra token hợp lệ
+                string checkQuery = @"SELECT sf.Password, f.FilePath, f.FileName, f.FileSize
+                              FROM SharedFolders sf
+                              JOIN Folders fd ON sf.FolderID = fd.ID
+                              JOIN Files f ON f.FolderID = fd.ID
+                              WHERE sf.Token = @Token AND f.ID = @FileID
+                              AND (sf.ExpiryDate IS NULL OR sf.ExpiryDate > GETDATE())";
+
+                SqlCommand cmd = new SqlCommand(checkQuery, conn);
+                cmd.Parameters.AddWithValue("@Token", token);
+                cmd.Parameters.AddWithValue("@FileID", fileId);
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    string filePath = reader["FilePath"].ToString();
+                    string fileName = reader["FileName"].ToString();
+
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+                        return File(fileBytes, "application/octet-stream", fileName);
+                    }
+                }
+            }
+            return Content("File không tồn tại hoặc link đã hết hạn");
+        }
+
+        public ActionResult AdvancedSearch(string keyword, string type, string size, string date)
+        {
+            if (Session["UserID"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            int userID = (int)Session["UserID"];
+            var files = new List<FileModel>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT * FROM Files WHERE UserID = @UserID AND IsDeleted = 0";
+                List<string> conditions = new List<string>();
+
+                if (!string.IsNullOrEmpty(keyword))
+                {
+                    conditions.Add("FileName LIKE @Keyword");
+                }
+                if (!string.IsNullOrEmpty(type))
+                {
+                    conditions.Add("FileType = @Type");
+                }
+                if (size == "lt")
+                {
+                    conditions.Add("FileSize < 1048576"); // 1MB
+                }
+                else if (size == "lt5")
+                {
+                    conditions.Add("FileSize < 5242880"); // 5MB
+                }
+                else if (size == "gt5")
+                {
+                    conditions.Add("FileSize > 5242880");
+                }
+                else if (size == "gt10")
+                {
+                    conditions.Add("FileSize > 10485760");
+                }
+
+                if (date == "today")
+                {
+                    conditions.Add("CAST(UploadedAt AS DATE) = CAST(GETDATE() AS DATE)");
+                }
+                else if (date == "week")
+                {
+                    conditions.Add("UploadedAt >= DATEADD(day, -7, GETDATE())");
+                }
+                else if (date == "month")
+                {
+                    conditions.Add("UploadedAt >= DATEADD(day, -30, GETDATE())");
+                }
+
+                if (conditions.Any())
+                {
+                    query += " AND " + string.Join(" AND ", conditions);
+                }
+
+                query += " ORDER BY UploadedAt DESC";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+                if (!string.IsNullOrEmpty(keyword))
+                {
+                    cmd.Parameters.AddWithValue("@Keyword", "%" + keyword + "%");
+                }
+                if (!string.IsNullOrEmpty(type))
+                {
+                    cmd.Parameters.AddWithValue("@Type", type);
+                }
+
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    files.Add(new FileModel
+                    {
+                        ID = (int)reader["ID"],
+                        FileName = reader["FileName"].ToString(),
+                        FileSize = (int)reader["FileSize"],
+                        FileType = reader["FileType"].ToString(),
+                        UploadedAt = (DateTime)reader["UploadedAt"],
+                        IsStarred = (bool)reader["IsStarred"]
+                    });
+                }
+            }
+
+            ViewBag.Keyword = keyword;
+            return View("Search", files);
+        }
+
+        // GET: Recent files
+        public ActionResult Recent()
+        {
+            if (Session["UserID"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            int userID = (int)Session["UserID"];
+            var files = new List<FileModel>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT TOP 20 * FROM Files 
+                         WHERE UserID = @UserID AND IsDeleted = 0 
+                         ORDER BY UploadedAt DESC";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    files.Add(new FileModel
+                    {
+                        ID = (int)reader["ID"],
+                        FileName = reader["FileName"].ToString(),
+                        FileSize = (int)reader["FileSize"],
+                        FileType = reader["FileType"].ToString(),
+                        UploadedAt = (DateTime)reader["UploadedAt"],
+                        IsStarred = (bool)reader["IsStarred"]
+                    });
+                }
+            }
+
+            ViewBag.Title = "Recent Files";
+            return View(files);
         }
 
     }

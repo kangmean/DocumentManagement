@@ -1,0 +1,96 @@
+﻿@model List<DocumentManagement.Models.FileModel>
+
+@{
+    ViewBag.Title = ViewBag.FolderName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .shared-header {
+        background: linear-gradient(135deg, #00BCD4, #0097A7);
+        padding: 40px;
+        border-radius: 16px;
+        color: white;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+        .shared-header h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .shared-header p {
+            opacity: 0.9;
+        }
+
+    .file-list {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #E0E0E0;
+    }
+
+        .file-list th {
+            background: #F8F9FA;
+            padding: 14px 16px;
+            text-align: left;
+        }
+
+        .file-list td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+    .download-btn {
+        background: #00BCD4;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+        .download-btn:hover {
+            background: #0097A7;
+        }
+</style>
+
+<div class="shared-header">
+    <h2><i class="fas fa-folder-open"></i> @ViewBag.FolderName</h2>
+    <p>Được chia sẻ bởi <strong>@ViewBag.OwnerName</strong></p>
+</div>
+
+<div class="file-list">
+    <table style="width:100%">
+        <thead>
+            <tr>
+                <th>Tên file</th>
+                <th>Kích thước</th>
+                <th>Ngày tải lên</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var file in Model)
+            {
+                <tr>
+                    <td>
+                        <i class="fas @(file.FileType == "pdf" ? "fa-file-pdf" : "fa-file")" style="margin-right: 10px;"></i>
+                        @file.FileName
+                    </td>
+                    <td>@file.FormattedSize</td>
+                    <td>@file.UploadedAt.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <form method="post" action="@Url.Action("DownloadSharedFile", "Drive")">
+                            <input type="hidden" name="fileId" value="@file.ID" />
+                            <input type="hidden" name="token" value="@ViewBag.Token" />
+                            <button type="submit" class="download-btn"><i class="fas fa-download"></i> Tải</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

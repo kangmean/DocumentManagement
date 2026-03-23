@@ -1,17 +1,19 @@
 ﻿@model List<DocumentManagement.Models.FileModel>
 
 @{
-    ViewBag.Title = "Kết quả tìm kiếm";
+    ViewBag.Title = "Recent Files";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
+    /* Layout 2 cột */
     .drive-layout {
         display: flex;
         gap: 24px;
         align-items: flex-start;
     }
 
+    /* Sidebar cố định, không bị cuộn */
     .drive-sidebar {
         width: 260px;
         flex-shrink: 0;
@@ -67,6 +69,7 @@
                 color: white;
             }
 
+    /* Nội dung chính */
     .drive-content {
         flex: 1;
         min-width: 0;
@@ -147,6 +150,12 @@
         border-radius: 12px;
         color: #999;
     }
+
+        .empty-message i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
 
     /* Modal */
     /* Modal đẹp */
@@ -322,11 +331,12 @@
 </style>
 
 <div class="drive-layout">
+    <!-- Sidebar -->
     <div class="drive-sidebar">
         <div class="menu-item" onclick="location.href='@Url.Action("Index", "Drive")'">
             <i class="fas fa-cloud"></i> My Drive
         </div>
-        <div class="menu-item" onclick="location.href='@Url.Action("Recent", "Drive")'">
+        <div class="menu-item active" onclick="location.href='@Url.Action("Recent", "Drive")'">
             <i class="fas fa-clock"></i> Recent
         </div>
         <div class="menu-item" onclick="location.href='@Url.Action("Starred", "Drive")'">
@@ -337,16 +347,17 @@
         </div>
     </div>
 
+    <!-- Nội dung chính -->
     <div class="drive-content">
         <div class="section-title">
-            <i class="fas fa-search"></i> Kết quả tìm kiếm: "@ViewBag.Keyword"
+            <i class="fas fa-clock"></i> Recent Files
         </div>
 
         @if (Model.Count == 0)
         {
             <div class="empty-message">
-                <i class="fas fa-search" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                <p>Không tìm thấy file nào phù hợp</p>
+                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>Chưa có file nào được tải lên gần đây</p>
             </div>
         }
         else
@@ -370,7 +381,7 @@
                                        style="color:@(file.FileType == "pdf" ? "#DC3545" : file.FileType == "docx" ? "#0D6EFD" : file.FileType == "xlsx" ? "#198754" : "#6C757D")"></i>
                                     @file.FileName
                                     @if (file.IsStarred)
-                                    {<i class="fas fa-star star-active" style="margin-left: 8px;"></i>}
+                                    {<i class="fas fa-star" style="color:#FFC107; margin-left:8px"></i>}
                                 </td>
                                 <td>@file.FormattedSize</td>
                                 <td>@file.UploadedAt.ToString("dd/MM/yyyy HH:mm")</td>
@@ -406,20 +417,19 @@
 </div>
 
 <script>
+    // Xóa file
     document.querySelectorAll('.delete-file').forEach(btn => btn.onclick = e => {
         e.stopPropagation();
         if (confirm('Xóa file?')) {
-            fetch('/Drive/Delete', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + btn.dataset.id })
-                .then(() => location.reload());
+            fetch('/Drive/Delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + btn.dataset.id
+            }).then(() => location.reload());
         }
     });
 
-    document.querySelectorAll('.star-file').forEach(btn => btn.onclick = e => {
-        e.stopPropagation();
-        fetch('/Drive/ToggleStar', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + btn.dataset.id })
-            .then(() => location.reload());
-    });
-
+    // Share file
     document.querySelectorAll('.share-file').forEach(btn => btn.onclick = e => {
         e.stopPropagation();
         let pwd = prompt('Mật khẩu (tùy chọn):');
@@ -427,6 +437,20 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'fileId=' + btn.dataset.id + '&password=' + encodeURIComponent(pwd || '')
-        }).then(r => r.json()).then(d => { if (d.success) prompt('Link:', d.url); else alert(d.message); });
+        }).then(r => r.json()).then(d => {
+            if (d.success) prompt('Link:', d.url);
+            else alert(d.message);
+        });
+    });
+
+    // Star file
+    document.querySelectorAll('.star-file').forEach(btn => btn.onclick = e => {
+        e.stopPropagation();
+        fetch('/Drive/ToggleStar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'id=' + btn.dataset.id
+        }).then(() => location.reload());
     });
 </script>
+
