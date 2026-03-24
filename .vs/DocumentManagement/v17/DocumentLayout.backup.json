@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "D:\\DocumentManagement\\Source\\DocumentManagement\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|d:\\documentmanagement\\source\\documentmanagement\\documentmanagement\\bundleconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|solutionrelative:documentmanagement\\bundleconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|d:\\documentmanagement\\source\\documentmanagement\\documentmanagement\\views\\drive\\previewpdf.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|solutionrelative:documentmanagement\\views\\drive\\previewpdf.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|d:\\documentmanagement\\source\\documentmanagement\\documentmanagement\\filterconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|solutionrelative:documentmanagement\\filterconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|d:\\documentmanagement\\source\\documentmanagement\\documentmanagement\\controllers\\drivecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|solutionrelative:documentmanagement\\controllers\\drivecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|d:\\documentmanagement\\source\\documentmanagement\\documentmanagement\\views\\drive\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|solutionrelative:documentmanagement\\views\\drive\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{814555DC-392C-4DAB-A8FC-AB3E33AA3E49}|DocumentManagement\\DocumentManagement.csproj|D:\\DocumentManagement\\Source\\DocumentManagement\\documentmanagement\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -48,17 +52,69 @@
         },
         {
           "DockedHeight": 139,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PreviewPDF.cshtml",
+              "DocumentMoniker": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Views\\Drive\\PreviewPDF.cshtml",
+              "RelativeDocumentMoniker": "DocumentManagement\\Views\\Drive\\PreviewPDF.cshtml",
+              "ToolTip": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Views\\Drive\\PreviewPDF.cshtml",
+              "RelativeToolTip": "DocumentManagement\\Views\\Drive\\PreviewPDF.cshtml",
+              "ViewState": "AgIAAKcAAAAAAAAAAAAswMoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-24T14:25:19.736Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DriveController.cs",
+              "DocumentMoniker": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Controllers\\DriveController.cs",
+              "RelativeDocumentMoniker": "DocumentManagement\\Controllers\\DriveController.cs",
+              "ToolTip": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Controllers\\DriveController.cs",
+              "RelativeToolTip": "DocumentManagement\\Controllers\\DriveController.cs",
+              "ViewState": "AgIAAJYDAAAAAAAAAAAiwKMDAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T12:25:31.876Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Views\\Drive\\Index.cshtml",
+              "RelativeDocumentMoniker": "DocumentManagement\\Views\\Drive\\Index.cshtml",
+              "ToolTip": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Views\\Drive\\Index.cshtml",
+              "RelativeToolTip": "DocumentManagement\\Views\\Drive\\Index.cshtml",
+              "ViewState": "AgIAANICAAAAAAAAAAAswNcCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-24T12:14:26.048Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "DocumentManagement\\Controllers\\AccountController.cs",
+              "ToolTip": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "DocumentManagement\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAqwE8AAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T10:53:08.35Z",
+              "EditorCaption": ""
             }
           ]
         },
         {
           "DockedHeight": 139,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -67,44 +123,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "BundleConfig.cs",
-              "DocumentMoniker": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\BundleConfig.cs",
-              "RelativeDocumentMoniker": "DocumentManagement\\BundleConfig.cs",
-              "ToolTip": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\BundleConfig.cs",
-              "RelativeToolTip": "DocumentManagement\\BundleConfig.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAQAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-24T10:52:24.551Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "FilterConfig.cs",
-              "DocumentMoniker": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\FilterConfig.cs",
-              "RelativeDocumentMoniker": "DocumentManagement\\FilterConfig.cs",
-              "ToolTip": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\FilterConfig.cs",
-              "RelativeToolTip": "DocumentManagement\\FilterConfig.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-24T10:53:11.147Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "AccountController.cs",
-              "DocumentMoniker": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Controllers\\AccountController.cs",
-              "RelativeDocumentMoniker": "DocumentManagement\\Controllers\\AccountController.cs",
-              "ToolTip": "D:\\DocumentManagement\\Source\\DocumentManagement\\DocumentManagement\\Controllers\\AccountController.cs",
-              "RelativeToolTip": "DocumentManagement\\Controllers\\AccountController.cs",
-              "ViewState": "AgIAAD8AAAAAAAAAAAAqwE8AAAAcAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-24T10:53:08.35Z"
             }
           ]
         },

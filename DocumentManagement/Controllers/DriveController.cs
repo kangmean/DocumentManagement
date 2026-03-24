@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using DocumentManagement.Models;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.IO;
@@ -47,20 +46,10 @@ namespace DocumentManagement.Controllers
 
             int userID = (int)Session["UserID"];
 
-            System.Diagnostics.Debug.WriteLine("=== UPLOAD ===");
-            System.Diagnostics.Debug.WriteLine("UserID trong session: " + userID);
-            System.Diagnostics.Debug.WriteLine("UserID: " + userID);
-            System.Diagnostics.Debug.WriteLine("Số file: " + (files != null ? files.Length.ToString() : "0"));
-
-
-
             if (files != null && files.Length > 0)
             {
-                // Tạo thư mục cho user nếu chưa có
-                string userFolder = @"D:\DocumentManagement\Source\DocumentManagement\DocumentManagement\Storage\User_" + userID;
-                System.Diagnostics.Debug.WriteLine("ĐƯỜNG DẪN THẬT: " + userFolder);
-                System.Diagnostics.Debug.WriteLine("THƯ MỤC CÓ TỒN TẠI: " + Directory.Exists(userFolder));
-                System.Diagnostics.Debug.WriteLine("Đường dẫn: " + userFolder);
+                // Tạo thư mục cho user nếu chưa có - DÙNG SERVER.MAPPATH
+                string userFolder = Server.MapPath("~/Storage/User_" + userID);
 
                 if (!Directory.Exists(userFolder))
                 {
@@ -71,9 +60,6 @@ namespace DocumentManagement.Controllers
                 {
                     if (file != null && file.ContentLength > 0)
                     {
-
-                        System.Diagnostics.Debug.WriteLine("Đang xử lý file: " + file.FileName);
-
                         string fileName = Path.GetFileName(file.FileName);
                         string filePath = Path.Combine(userFolder, fileName);
 
@@ -116,7 +102,6 @@ namespace DocumentManagement.Controllers
                 cmd.Parameters.AddWithValue("@FileType", fileType);
                 cmd.Parameters.AddWithValue("@UserID", userID);
 
-                // CHỈ 1 DÒNG NÀY - ĐÃ XÓA DÒNG CŨ
                 if (folderId == null || folderId == 0)
                 {
                     cmd.Parameters.AddWithValue("@FolderID", DBNull.Value);
@@ -128,7 +113,7 @@ namespace DocumentManagement.Controllers
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
-                
+
                 string userName = Session["Username"].ToString();
                 string ip = LogHelper.GetClientIP();
                 LogHelper.Log(userID, userName, "Upload", fileName, fileSize, ip);
@@ -183,7 +168,6 @@ namespace DocumentManagement.Controllers
                 string query = "";
                 string whereClause = "";
 
-                // Xây dựng WHERE clause
                 if (folderId == null || folderId == 0)
                 {
                     whereClause = "UserID = @UserID AND IsDeleted = 0 AND FolderID IS NULL";
@@ -193,7 +177,6 @@ namespace DocumentManagement.Controllers
                     whereClause = "UserID = @UserID AND IsDeleted = 0 AND FolderID = @FolderID";
                 }
 
-                // Thêm filter (chỉ thêm khi filter KHÔNG phải "All" và KHÔNG rỗng)
                 if (!string.IsNullOrEmpty(filter) && filter != "All")
                 {
                     whereClause += " AND FileType = @Filter";
@@ -201,7 +184,6 @@ namespace DocumentManagement.Controllers
 
                 query = "SELECT * FROM Files WHERE " + whereClause;
 
-                // Thêm ORDER BY
                 switch (sort)
                 {
                     case "name":
@@ -226,7 +208,6 @@ namespace DocumentManagement.Controllers
                     cmd.Parameters.AddWithValue("@FolderID", folderId);
                 }
 
-                // Chỉ thêm filter khi không phải "All"
                 if (!string.IsNullOrEmpty(filter) && filter != "All")
                 {
                     cmd.Parameters.AddWithValue("@Filter", filter);
@@ -342,11 +323,9 @@ namespace DocumentManagement.Controllers
                     string filePath = reader["FilePath"].ToString();
                     string fileName = reader["FileName"].ToString();
                     int fileSize = (int)reader["FileSize"];
-                    // Ghi log download (sẽ làm sau)
                     string userName = Session["Username"].ToString();
                     string ip = LogHelper.GetClientIP();
                     LogHelper.Log(userID, userName, "Download", fileName, fileSize, ip);
-                    // Trả file về cho client
                     byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
                     return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
                 }
@@ -370,7 +349,6 @@ namespace DocumentManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                // Lấy thông tin file trước khi xóa
                 string getFileQuery = "SELECT FileName, FileSize FROM Files WHERE ID = @ID AND UserID = @UserID AND IsDeleted = 0";
                 SqlCommand getCmd = new SqlCommand(getFileQuery, conn);
                 getCmd.Parameters.AddWithValue("@ID", id);
@@ -393,7 +371,6 @@ namespace DocumentManagement.Controllers
                     return Json(new { success = false, message = "Không tìm thấy file" });
                 }
 
-                // Xóa mềm
                 string query = "UPDATE Files SET IsDeleted = 1, DeletedAt = GETDATE() WHERE ID = @ID AND UserID = @UserID";
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@ID", id);
@@ -402,7 +379,6 @@ namespace DocumentManagement.Controllers
 
                 if (rows > 0)
                 {
-                    // Ghi log xóa
                     LogHelper.Log(userID, userName, "Delete", fileName, fileSize, ip);
                     return Json(new { success = true, message = "Đã xóa file" });
                 }
@@ -429,7 +405,6 @@ namespace DocumentManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                // KHÔNG có ID trong câu INSERT (ID tự tăng)
                 string query = @"INSERT INTO Folders (FolderName, UserID, ParentFolderID, CreatedAt, IsDeleted, FolderColor)
                          VALUES (@FolderName, @UserID, @ParentFolderID, GETDATE(), 0, '#808080')";
 
@@ -531,7 +506,6 @@ namespace DocumentManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                // Lấy đường dẫn file trước khi xóa
                 string query = "SELECT FilePath FROM Files WHERE ID = @ID AND UserID = @UserID";
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@ID", id);
@@ -545,7 +519,6 @@ namespace DocumentManagement.Controllers
                     System.IO.File.Delete(filePath);
                 }
 
-                // Xóa khỏi database
                 query = "DELETE FROM Files WHERE ID = @ID AND UserID = @UserID";
                 cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@ID", id);
@@ -556,7 +529,7 @@ namespace DocumentManagement.Controllers
             return Json(new { success = true });
         }
 
-        // POST: Toggle Star (đánh dấu sao/bỏ sao)
+        // POST: Toggle Star
         [HttpPost]
         public ActionResult ToggleStar(int id)
         {
@@ -579,7 +552,6 @@ namespace DocumentManagement.Controllers
 
                 if (rows > 0)
                 {
-                    // Lấy trạng thái mới
                     query = "SELECT IsStarred FROM Files WHERE ID = @ID";
                     cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@ID", id);
@@ -592,7 +564,7 @@ namespace DocumentManagement.Controllers
             return Json(new { success = false });
         }
 
-        // GET: Starred (hiển thị file đã đánh dấu sao)
+        // GET: Starred
         public ActionResult Starred()
         {
             if (Session["UserID"] == null)
@@ -682,19 +654,12 @@ namespace DocumentManagement.Controllers
         {
             try
             {
-                // Ghi log ra file để debug
-                string logPath = @"D:\error_log.txt";
-                System.IO.File.AppendAllText(logPath, $"=== CreateShareLink called at {DateTime.Now} ===\n");
-                System.IO.File.AppendAllText(logPath, $"fileId: {fileId}, password: {password ?? "null"}\n");
-
                 if (Session["UserID"] == null)
                 {
-                    System.IO.File.AppendAllText(logPath, "Session UserID null\n");
                     return Json(new { success = false, message = "Chưa đăng nhập" });
                 }
 
                 int userID = (int)Session["UserID"];
-                System.IO.File.AppendAllText(logPath, $"userID: {userID}\n");
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
@@ -704,7 +669,6 @@ namespace DocumentManagement.Controllers
                     checkCmd.Parameters.AddWithValue("@UserID", userID);
                     conn.Open();
                     int count = (int)checkCmd.ExecuteScalar();
-                    System.IO.File.AppendAllText(logPath, $"File count: {count}\n");
 
                     if (count == 0)
                     {
@@ -712,7 +676,6 @@ namespace DocumentManagement.Controllers
                     }
 
                     string token = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
-                    System.IO.File.AppendAllText(logPath, $"token: {token}\n");
 
                     string query = @"INSERT INTO SharedLinks (FileID, Token, Password, CreatedAt, DownloadCount)
                              VALUES (@FileID, @Token, @Password, GETDATE(), 0)";
@@ -722,20 +685,15 @@ namespace DocumentManagement.Controllers
                     cmd.Parameters.AddWithValue("@Token", token);
                     cmd.Parameters.AddWithValue("@Password", string.IsNullOrEmpty(password) ? (object)DBNull.Value : password);
 
-                    int rows = cmd.ExecuteNonQuery();
-                    System.IO.File.AppendAllText(logPath, $"Rows inserted: {rows}\n");
+                    cmd.ExecuteNonQuery();
 
                     string shareUrl = Request.Url.Scheme + "://" + Request.Url.Authority + "/Drive/Shared?token=" + token;
-                    System.IO.File.AppendAllText(logPath, $"Success, url: {shareUrl}\n");
 
                     return Json(new { success = true, url = shareUrl });
                 }
             }
             catch (Exception ex)
             {
-                string logPath = @"D:\error_log.txt";
-                System.IO.File.AppendAllText(logPath, $"ERROR: {ex.Message}\n");
-                System.IO.File.AppendAllText(logPath, $"STACK: {ex.StackTrace}\n");
                 return Json(new { success = false, message = ex.Message });
             }
         }
@@ -771,7 +729,6 @@ namespace DocumentManagement.Controllers
                         FileSize = (int)reader["FileSize"]
                     };
 
-                    // Nếu có password, hiện form nhập
                     if (!string.IsNullOrEmpty(share.Password))
                     {
                         ViewBag.Token = token;
@@ -815,7 +772,7 @@ namespace DocumentManagement.Controllers
                     };
 
                     ViewBag.Token = token;
-                    ViewBag.Password = password; // THÊM DÒNG NÀY ĐỂ TRUYỀN MẬT KHẨU
+                    ViewBag.Password = password;
                     return View("SharedView", share);
                 }
             }
@@ -826,11 +783,9 @@ namespace DocumentManagement.Controllers
         }
 
         // GET: Download file từ link chia sẻ
-        [HttpPost] // THÊM [HttpPost]
+        [HttpPost]
         public ActionResult DownloadShared(string token, string password)
         {
-            System.Diagnostics.Debug.WriteLine("DownloadShared - Token: " + token + ", Password: " + password);
-
             if (string.IsNullOrEmpty(token))
             {
                 return Content("Link không hợp lệ - Token rỗng");
@@ -868,13 +823,11 @@ namespace DocumentManagement.Controllers
                     return Content("Link không hợp lệ hoặc đã hết hạn");
                 }
 
-                // Kiểm tra password
                 if (!string.IsNullOrEmpty(dbPassword) && password != dbPassword)
                 {
                     return Content("Mật khẩu không đúng");
                 }
 
-                // Tăng lượt download
                 string updateQuery = "UPDATE SharedLinks SET DownloadCount = DownloadCount + 1 WHERE Token = @Token";
                 SqlCommand updateCmd = new SqlCommand(updateQuery, conn);
                 updateCmd.Parameters.AddWithValue("@Token", token);
@@ -953,22 +906,18 @@ namespace DocumentManagement.Controllers
 
         public ActionResult GetPdfFile(string filePath)
         {
-            // Kiểm tra đăng nhập
             if (Session["UserID"] == null)
             {
                 return Content("Lỗi: Chưa đăng nhập");
             }
 
-            // Giải mã đường dẫn
             filePath = Server.UrlDecode(filePath);
 
-            // Kiểm tra filePath
             if (string.IsNullOrEmpty(filePath))
             {
                 return Content("Lỗi: filePath bị null hoặc rỗng");
             }
 
-            // Kiểm tra file tồn tại
             if (!System.IO.File.Exists(filePath))
             {
                 return Content("Lỗi: File không tồn tại tại đường dẫn: " + filePath);
@@ -977,6 +926,11 @@ namespace DocumentManagement.Controllers
             try
             {
                 byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+                // Thêm header cho phép CORS
+                Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST");
+
                 return File(fileBytes, "application/pdf");
             }
             catch (Exception ex)
@@ -1005,7 +959,7 @@ namespace DocumentManagement.Controllers
             return Json(new { success = true });
         }
 
-        // Delete folder (xóa mềm, chuyển file vào thùng rác)
+        // Delete folder
         [HttpPost]
         public ActionResult DeleteFolder(int folderId)
         {
@@ -1015,14 +969,12 @@ namespace DocumentManagement.Controllers
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                // Xóa mềm folder
                 string query = "UPDATE Folders SET IsDeleted = 1 WHERE ID = @ID AND UserID = @UserID";
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@ID", folderId);
                 cmd.Parameters.AddWithValue("@UserID", userID);
                 cmd.ExecuteNonQuery();
 
-                // Chuyển file trong folder vào thùng rác
                 query = "UPDATE Files SET IsDeleted = 1, DeletedAt = GETDATE() WHERE FolderID = @FolderID AND UserID = @UserID";
                 cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@FolderID", folderId);
@@ -1045,7 +997,6 @@ namespace DocumentManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                // Kiểm tra folder thuộc user
                 string checkQuery = "SELECT COUNT(*) FROM Folders WHERE ID = @FolderID AND UserID = @UserID AND IsDeleted = 0";
                 SqlCommand checkCmd = new SqlCommand(checkQuery, conn);
                 checkCmd.Parameters.AddWithValue("@FolderID", folderId);
@@ -1058,7 +1009,6 @@ namespace DocumentManagement.Controllers
                     return Json(new { success = false, message = "Thư mục không tồn tại" });
                 }
 
-                // Tạo token
                 string token = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
 
                 string query = @"INSERT INTO SharedFolders (FolderID, Token, Password, CreatedAt, ExpiryDate)
@@ -1084,7 +1034,6 @@ namespace DocumentManagement.Controllers
             {
                 conn.Open();
 
-                // Lấy thông tin shared folder
                 string query = @"SELECT sf.*, f.FolderName, f.UserID as OwnerID, u.Username as OwnerName
                          FROM SharedFolders sf
                          JOIN Folders f ON sf.FolderID = f.ID
@@ -1106,9 +1055,8 @@ namespace DocumentManagement.Controllers
                         string folderName = reader["FolderName"].ToString();
                         string ownerName = reader["OwnerName"].ToString();
                         string password = reader["Password"] == DBNull.Value ? null : reader["Password"].ToString();
-                        reader.Close(); // Đóng reader trước khi dùng connection mới
+                        reader.Close();
 
-                        // Lấy danh sách file trong folder
                         var files = new List<FileModel>();
                         string fileQuery = "SELECT * FROM Files WHERE FolderID = @FolderID AND IsDeleted = 0";
                         using (SqlCommand fileCmd = new SqlCommand(fileQuery, conn))
@@ -1176,7 +1124,6 @@ namespace DocumentManagement.Controllers
                         string folderName = reader["FolderName"].ToString();
                         reader.Close();
 
-                        // Lấy danh sách file
                         var files = new List<FileModel>();
                         string fileQuery = "SELECT * FROM Files WHERE FolderID = @FolderID AND IsDeleted = 0";
                         using (SqlCommand fileCmd = new SqlCommand(fileQuery, conn))
@@ -1212,7 +1159,6 @@ namespace DocumentManagement.Controllers
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                // Kiểm tra token hợp lệ
                 string checkQuery = @"SELECT sf.Password, f.FilePath, f.FileName, f.FileSize
                               FROM SharedFolders sf
                               JOIN Folders fd ON sf.FolderID = fd.ID
@@ -1266,11 +1212,11 @@ namespace DocumentManagement.Controllers
                 }
                 if (size == "lt")
                 {
-                    conditions.Add("FileSize < 1048576"); // 1MB
+                    conditions.Add("FileSize < 1048576");
                 }
                 else if (size == "lt5")
                 {
-                    conditions.Add("FileSize < 5242880"); // 5MB
+                    conditions.Add("FileSize < 5242880");
                 }
                 else if (size == "gt5")
                 {
@@ -1371,6 +1317,5 @@ namespace DocumentManagement.Controllers
             ViewBag.Title = "Recent Files";
             return View(files);
         }
-
     }
 }

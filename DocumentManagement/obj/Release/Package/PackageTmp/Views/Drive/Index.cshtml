@@ -726,19 +726,29 @@
         else sortSelect.value = 'date_desc';
     }
 
-    // Upload
-    document.getElementById('uploadBtn').onclick = () => {
-        let input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = true;
-        input.onchange = () => {
-            let form = new FormData();
-            for (let f of input.files) form.append('files', f);
-            form.append('folderId', '@Model.CurrentFolderID');
-            fetch('@Url.Action("Upload", "Drive")', { method: 'POST', body: form }).then(() => location.reload());
+    // Upload file
+document.getElementById('uploadBtn').onclick = function() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.onchange = function() {
+        var formData = new FormData();
+        for (var i = 0; i < this.files.length; i++) {
+            formData.append('files', this.files[i]);
+        }
+        formData.append('folderId', '@Model.CurrentFolderID');
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '@Url.Action("Upload", "Drive")', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                location.reload();
+            }
         };
-        input.click();
+        xhr.send(formData);
     };
+    input.click();
+};
 
     // New folder
     document.getElementById('newFolderBtn').onclick = () => {

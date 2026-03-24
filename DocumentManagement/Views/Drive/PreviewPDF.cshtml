@@ -178,16 +178,29 @@
     }
 
     function loadPdf() {
-        var loadingDiv = document.querySelector('.loading');
-        pdfjsLib.getDocument(getPdfUrl()).promise.then(function(pdf) {
-            pdfDoc = pdf;
-            document.getElementById('total-pages').textContent = pdfDoc.numPages;
-            loadingDiv.style.display = 'none';
-            renderPage(currentPage);
-        }).catch(function(error) {
-            loadingDiv.innerHTML = '<div class="loading"><i class="fas fa-exclamation-triangle"></i><p>Không thể tải file PDF. Lỗi: ' + error.message + '</p></div>';
-        });
-    }
+    var loadingDiv = document.querySelector('.loading');
+    var url = '@Url.Action("GetPdfFile", "Drive")' + '?filePath=' + encodeURIComponent(filePath);
+
+    // Dùng fetch để lấy file dạng blob
+    fetch(url, {
+        credentials: 'same-origin'
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        var blobUrl = URL.createObjectURL(blob);
+        return pdfjsLib.getDocument(blobUrl).promise;
+    })
+    .then(function(pdf) {
+        pdfDoc = pdf;
+        document.getElementById('total-pages').textContent = pdfDoc.numPages;
+        loadingDiv.style.display = 'none';
+        renderPage(currentPage);
+    })
+    .catch(function(error) {
+        console.error('Lỗi tải PDF:', error);
+        loadingDiv.innerHTML = '<div class="alert alert-danger">Không thể tải file PDF. Lỗi: ' + error.message + '</div>';
+    });
+}
 
     function renderPage(pageNum) {
         pdfDoc.getPage(pageNum).then(function(page) {
